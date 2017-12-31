@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <script src="lib/d3.min.js"></script>
+<style>
+.line {
+   fill: none;
+   stroke: steelblue;
+   stroke-linejoin: round;
+   stroke-linecap: round;
+   stroke-width: 1.5;
+}
+
+.axisBar {
+   fill: none;
+   stroke: black;
+   stroke-width: 1.5;
+}
+
+.axisBar text {
+   fill: black;
+   stroke: blue;
+   stroke-width: 0.5;
+}
+
+</style>
+</head>
+<body>
+<p>Attribution: Mike Bostock<br>Used code from the link below and modified it for json data and D3 version 3.5.6:<br>
+<a href="https://bl.ocks.org/mbostock/3883245" target="_blank">https://bl.ocks.org/mbostock/3883245</a></p>
+
+<script>
+//create an svg window and append a g element to it
+var svg = d3.select("body").append("svg").attr("width", 800).attr("height", 400),
+    margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = +svg.attr("width") - margin.left - margin.right - 20,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+//convert the date text string to a date objects    
+var parseTime = d3.time.format("%m/%d/%Y").parse;
+
+var x = d3.time.scale()
+    .rangeRound([0, width]);
+
+var y = d3.scale.linear()
+    .rangeRound([height, 0]);
+
+//get the line values
+var line = d3.svg.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.value); });
+
+//get the json data from the server
+d3.json("data/data.json", function(error, data) {
+  if (error) throw error;
+  data.data.forEach(function(d){
+     d.date = parseTime(d.date); //convert date text to date object
+     d.value = +d.value;         //ditto for the value in case its stored as a string
+  });
+
+  //set the min and max values for each of the axes
+  x.domain(d3.extent(data.data, function(d) { return d.date; }));
+  y.domain(d3.extent(data.data, function(d) { return d.value; }));
+
+  //create the x-axis and move it to the bottom of the graph
+  g.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.svg.axis().scale(x).orient("bottom"))
+      .attr("class", "axisBar");
+
+  //create the y-axis and move it to the left (vertical)
+  g.append("g")
+      .call(d3.svg.axis().scale(y).orient("left"))
+      .attr("class", "axisBar");
+
+  //draw the line from the data
+  g.append("path")
+      .datum(data.data)
+      .attr("class", "line")
+      .attr("d", line(data.data));
+});
+</script>
+</body>
+</html>

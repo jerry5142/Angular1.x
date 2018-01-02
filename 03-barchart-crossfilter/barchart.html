@@ -7,60 +7,64 @@
 
 <style>
 .chart {
+   font: 12px sans-serif;  
+   fill: gray;
    border: solid 1px;
    border-color: gray;
 }
 
 .chart rect {
-   fill: steelblue;
-   margin-top: 60px;
+   fill: black;
 }
 
 .chart text {
-  fill: white;
-  font: 12px sans-serif;
-  text-anchor: end;
+   font-size: 18px;
+   text-anchor: end;
 }
-
 
 .axisBar {
    fill: none;
-   stroke: steelblue;
+   stroke: gray;
    stroke-width: 1.5;
 }
 
 .axisBar text {
    font: 12px sans-serif;  
    fill: black;
-   stroke: blue;
+   stroke: gray;
    stroke-width: 0.5;
 }
 
 </style>
 </head>
 <body>
-<p>Attribution: Mike Bostock<br>Used code from the link below and modified it for json data and D3 version 3.5.6:<br>
-<a href="https://bl.ocks.org/mbostock/7341714" target="_blank">https://bl.ocks.org/mbostock/7341714</a></p>
-
 <svg id="colors"></svg>
-
 <script>
 //create an svg window and append a g element to it
-var chart = d3.select("#colors").attr("width", 420).attr("height", 250),
+//var chart = d3.select("#colors").append("svg").attr("width", 420).attr("height", 300),
+var chart = d3.select("#colors").attr("width", 600).attr("height", 350),
     margin = {top: 20, right: 20, bottom: 30, left: 50},
     width = +chart.attr("width") - margin.left - margin.right,
     height = +chart.attr("height") - margin.top - margin.bottom,
     g = chart.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-   //set the class for the chart 
-   chart.attr("class", "chart");
-   
-var barHeight = 30;
 
+var xAxisTicIncr = 50;     
+var barHeight = height / 6;
+
+//set the axis scales
 var x = d3.scale.linear()
     .range([0, width]);
-
 var y = d3.scale.linear()
     .rangeRound([height, 0]);
+
+ //set the class for the chart 
+chart.attr("class", "chart");
+
+//add a title
+g.append("text")
+   .attr("x", (width / 2))             
+   .attr("y", 0)
+   .text("Colors");
       
 d3.json("data/dataCat.json", function(data) {
 	//create dimensions
@@ -70,15 +74,22 @@ d3.json("data/dataCat.json", function(data) {
 	var colorGroupCounts = colorDim.group().reduceSum(function(fact){ return fact.value; });
 	var colorGroupSize = colorGroupCounts.size();
 	var colorRecords = colorGroupCounts.all();   
-
-	x.domain([0, d3.max(colorRecords, function(d) { return d.value; })]);
-
-   var barSpacing = (height / colorGroupSize) - barHeight;
+  
+   var maxXtic = d3.max(colorRecords, function(d) { return d.value; });
+   if(maxXtic % xAxisTicIncr){ // make max axis tic round up to next xAxisTicIncr
+      maxXtic = maxXtic - (maxXtic % xAxisTicIncr) + xAxisTicIncr;
+   }
+   var xTicCount = maxXtic / xAxisTicIncr;
+   
+   x.domain([0, maxXtic]);
+ 
+   var barSection = (height / colorGroupSize);
+   var barTop = (barSection - barHeight) / 2 ;
 
    var bar = g.selectAll("g")
    .data(colorRecords)
    .enter().append("g")
-     .attr("transform", function(d, i) { return "translate(0," + i * (barHeight + barSpacing) + ")"; });
+     .attr("transform", function(d, i) { return "translate(0," + Math.round( i * barSection + barTop) + ")"; });
 
    bar.append("rect")
      .attr("width", function(d) { return x(d.value); })
@@ -88,52 +99,19 @@ d3.json("data/dataCat.json", function(data) {
      .attr("x", function(d) { return x(d.value) - 3; })
      .attr("y", barHeight / 2)
      .attr("dy", ".35em")
-     .text(function(d) { return d.value; });
   
    //create the x-axis and move it to the bottom of the graph
    g.append("g")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.svg.axis().scale(x).orient("bottom"))
+      .call(d3.svg.axis().scale(x).orient("bottom").ticks(xTicCount))
       .attr("class", "axisBar");
 
    //create the y-axis and move it to the left (vertical)
    g.append("g")
       .call(d3.svg.axis().scale(y).orient("left"))
       .attr("class", "axisBar");
- //     .text(function(fact) { return colorRecords.value; });
- 
 });
-/*
-var width = 420,
-    barHeight = 20;
 
-var x = d3.scale.linear()
-    .range([0, width]);
-
-var chart = d3.select(".chart")
-    .attr("width", width);
-
-d3.json("data/dataCat.json", function(data) {
-  x.domain([0, d3.max(data.data, function(d) { return d.value; })]);
-
-  chart.attr("height", barHeight * data.data.length);
-
-  var bar = chart.selectAll("g")
-      .data(data.data)
-    .enter().append("g")
-      .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
-
-  bar.append("rect")
-      .attr("width", function(d) { return x(d.value); })
-      .attr("height", barHeight - 1);
-
-  bar.append("text")
-      .attr("x", function(d) { return x(d.value) - 3; })
-      .attr("y", barHeight / 2)
-      .attr("dy", ".35em")
-      .text(function(d) { return d.value; });
-});
-*/
 </script>
 
 </body>

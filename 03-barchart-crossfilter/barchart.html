@@ -7,113 +7,132 @@
 
 <style>
 .chart {
-   font: 12px sans-serif;  
-   fill: gray;
    border: solid 1px;
    border-color: gray;
+   margin: 30px;
+}
+
+.chart .chartTitle {
+   font: 18px sans-serif;
+   fill: gray;
 }
 
 .chart rect {
    fill: black;
+   opacity: 1;   
+}
+
+.chart rect:hover {
+   fill: gray;
 }
 
 .chart text {
-   font-size: 18px;
+   font: 14px sans-serif;
+   fill: gray;
    text-anchor: end;
 }
 
-.axisBar {
+.axis {
    fill: none;
-   stroke: gray;
-   stroke-width: 1.5;
 }
 
-.axisBar text {
-   font: 12px sans-serif;  
-   fill: black;
+.axis text {
+   fill: light-gray;
+   stroke: light-gray;
+   stroke-width: 0.25;
+}
+
+.chart line {
    stroke: gray;
-   stroke-width: 0.5;
+   stroke-width: 1;
+   stroke-opacity:0.3;
 }
 
 </style>
 </head>
 <body>
 <svg id="colors"></svg>
+<svg id="alphabet"></svg>
 <script>
-//create an svg window and append a g element to it
-//var chart = d3.select("#colors").append("svg").attr("width", 420).attr("height", 300),
-var chart = d3.select("#colors").attr("width", 600).attr("height", 350),
-    margin = {top: 20, right: 20, bottom: 30, left: 50},
-    width = +chart.attr("width") - margin.left - margin.right,
-    height = +chart.attr("height") - margin.top - margin.bottom,
-    g = chart.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+//===========Configuration=============
+//color chart
+drawBarChart("Colors", "colors", 500, 300, 60, 20, 30, 60, 50, "data/dataCat.json", "category1");
+//alpha chart
+drawBarChart("Alphabet", "alphabet", 500, 300, 60, 20, 30, 60, 50, "data/dataCat.json", "category2");
 
-var xAxisTicIncr = 50;     
-var barHeight = height / 6;
+//draws a bar chart
+function drawBarChart(title, chartId, chartWidth, chartHeight, marginTop, marginRight, marginBottom, marginLeft, xAxisTicIncr, dataFilePath, category){
+   //create an svg window and append a g element to it
+   var chart = d3.select("#" + chartId).attr("width", chartWidth).attr("height", chartHeight),
+       margin = {top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft},
+       width = +chart.attr("width") - margin.left - margin.right,
+       height = +chart.attr("height") - margin.top - margin.bottom,
+       g = chart.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+   var barHeight = height / 6;
 
-//set the axis scales
-var x = d3.scale.linear()
-    .range([0, width]);
-var y = d3.scale.linear()
-    .rangeRound([height, 0]);
+   //set the axis scales
+   var x = d3.scale.linear()
+       .range([0, width]);
 
- //set the class for the chart 
-chart.attr("class", "chart");
+   //set the class for the chart 
+   chart.attr("class", "chart");
 
-//add a title
-g.append("text")
-   .attr("x", (width / 2))             
-   .attr("y", 0)
-   .text("Colors");
+   //get the data and graph it      
+   d3.json(dataFilePath, function(data) {
+      //create dimension, group by color, sum by value, and sort by grouped value
+      var colorRecords = crossfilter(data.data)
+         .dimension(function(fact){ return fact[category]; })
+         .group()
+         .reduceSum(function(d){ return d.value; })
+         .all()
+         .sort(function(x, y){ return d3.ascending(x.value, y.value); });
       
-d3.json("data/dataCat.json", function(data) {
-	//create dimensions
-	var cf = crossfilter(data.data);
-	var colorDim = cf.dimension(function(d){ return d.category1; });
-	//sum the values for each color
-	var colorGroupCounts = colorDim.group().reduceSum(function(fact){ return fact.value; });
-	var colorGroupSize = colorGroupCounts.size();
-	var colorRecords = colorGroupCounts.all();   
-  
-   var maxXtic = d3.max(colorRecords, function(d) { return d.value; });
-   if(maxXtic % xAxisTicIncr){ // make max axis tic round up to next xAxisTicIncr
-      maxXtic = maxXtic - (maxXtic % xAxisTicIncr) + xAxisTicIncr;
-   }
-   var xTicCount = maxXtic / xAxisTicIncr;
-   
-   x.domain([0, maxXtic]);
- 
-   var barSection = (height / colorGroupSize);
-   var barTop = (barSection - barHeight) / 2 ;
+      var maxXtic = d3.max(colorRecords, function(d) { return d.value; });
+      if(maxXtic % xAxisTicIncr){ // make max axis tic round up to next xAxisTicIncr
+         maxXtic = maxXtic - (maxXtic % xAxisTicIncr) + xAxisTicIncr;
+      }
+      var xTicCount = maxXtic / xAxisTicIncr;  
+      x.domain([0, maxXtic]);
+      
+      var barSection = (height / colorRecords.length);
+      var barTop = (barSection - barHeight) / 2 ;
 
-   var bar = g.selectAll("g")
-   .data(colorRecords)
-   .enter().append("g")
-     .attr("transform", function(d, i) { return "translate(0," + Math.round( i * barSection + barTop) + ")"; });
+      var yAxisLabels = d3.extent(colorRecords, function(d) { return d.key; });
+      
+      var bar = g.selectAll("g")
+      .data(colorRecords)
+      .enter().append("g")
+        .attr("transform", function(d, i) { return "translate(0," + Math.round( i * barSection + barTop) + ")"; });
+        
+      bar.append("text")
+         .attr("class", "chart")
+         .attr("x", -10)
+         .attr("y", barTop - 5)
+         .attr("dy", "0.71em")
+         .attr("text-anchor", "end")
+         .text(function(d){ return d.key; }); 
+     
+      //create the x-axis and move it to the bottom of the graph
+      g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.svg.axis().scale(x).orient("bottom").ticks(xTicCount).innerTickSize(-height))
+         .attr("class", "axis");      
+     
+      bar.append("rect")
+        .attr("width", function(d) { return x(d.value); })
+        .attr("height", barHeight - 1);;
 
-   bar.append("rect")
-     .attr("width", function(d) { return x(d.value); })
-     .attr("height", barHeight - 1);
-
-   bar.append("text")
-     .attr("x", function(d) { return x(d.value) - 3; })
-     .attr("y", barHeight / 2)
-     .attr("dy", ".35em")
-  
-   //create the x-axis and move it to the bottom of the graph
-   g.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.svg.axis().scale(x).orient("bottom").ticks(xTicCount))
-      .attr("class", "axisBar");
-
-   //create the y-axis and move it to the left (vertical)
-   g.append("g")
-      .call(d3.svg.axis().scale(y).orient("left"))
-      .attr("class", "axisBar");
-});
-
+      //add a title
+      g.append("g")
+        .append("text")
+         .attr("class", "chartTitle")     
+         .attr("x", width / 2)             
+         .attr("y", -margin.top / 2)
+         .text(title);
+   });
+};
 </script>
-
 </body>
 </html>
 

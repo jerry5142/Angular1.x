@@ -22,7 +22,7 @@
    opacity: 1;   
 }
 
-.chart rect:hover {
+.chart rect .excluded {
    fill: gray;
 }
 
@@ -81,13 +81,14 @@ function drawBarChart(title, chartId, chartWidth, chartHeight, marginTop, margin
    //get the data and graph it      
    d3.json(dataFilePath, function(data) {
       //create dimension, group by color, sum by value, and sort by grouped value
-      var colorRecords = crossfilter(data.data)
+      var cf = crossfilter(data.data);
+      var colorRecords = cf
          .dimension(function(fact){ return fact[category]; })
          .group()
          .reduceSum(function(d){ return d.value; })
          .all()
          .sort(function(x, y){ return d3.ascending(x.value, y.value); });
-      
+            
       var maxXtic = d3.max(colorRecords, function(d) { return d.value; });
       if(maxXtic % xAxisTicIncr){ // make max axis tic round up to next xAxisTicIncr
          maxXtic = maxXtic - (maxXtic % xAxisTicIncr) + xAxisTicIncr;
@@ -113,16 +114,16 @@ function drawBarChart(title, chartId, chartWidth, chartHeight, marginTop, margin
          .attr("text-anchor", "end")
          .text(function(d){ return d.key; }); 
      
+      bar.append("rect")
+        .attr("width", function(d) { return x(d.value); })
+        .attr("height", barHeight - 1);
+
       //create the x-axis and move it to the bottom of the graph
       g.append("g")
          .attr("transform", "translate(0," + height + ")")
          .call(d3.svg.axis().scale(x).orient("bottom").ticks(xTicCount).innerTickSize(-height))
          .attr("class", "axis");      
      
-      bar.append("rect")
-        .attr("width", function(d) { return x(d.value); })
-        .attr("height", barHeight - 1);;
-
       //add a title
       g.append("g")
         .append("text")
@@ -130,7 +131,16 @@ function drawBarChart(title, chartId, chartWidth, chartHeight, marginTop, margin
          .attr("x", width / 2)             
          .attr("y", -margin.top / 2)
          .text(title);
+
+      //add click handler
+      chart.selectAll("g rect").on("click", function (d){
+         //this.style("fill", "red")// bar.attr("fill", "red");
+         console.log(d);
+   //      d.attr("class", "excluded");
+      }); 
+
    });
+   
 };
 </script>
 </body>

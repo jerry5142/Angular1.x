@@ -30,27 +30,26 @@ function drawBarChart(title, chartId, chartWidth, chartHeight, marginTop, margin
    d3.json(dataFilePath, function(data) {
       //create dimension, group by color, sum by value, and sort by grouped value
       var cf = crossfilter(data.data);
-      var colorRecords = cf
-         .dimension(function(fact){ return fact[category]; })
-         .group()
+      var dim = cf.dimension(function(fact){ return fact[category]; });
+      var records = dim.group()
          .reduceSum(function(d){ return d.value; })
          .all()
          .sort(function(x, y){ return d3.ascending(x.value, y.value); });
             
-      var maxXtic = d3.max(colorRecords, function(d) { return d.value; });
+      var maxXtic = d3.max(records, function(d) { return d.value; });
       if(maxXtic % xAxisTicIncr){ // make max axis tic round up to next xAxisTicIncr
          maxXtic = maxXtic - (maxXtic % xAxisTicIncr) + xAxisTicIncr;
       }
       var xTicCount = maxXtic / xAxisTicIncr;  
       x.domain([0, maxXtic]);
       
-      var barSection = (height / colorRecords.length);
+      var barSection = (height / records.length);
       var barTop = (barSection - barHeight) / 2 ;
 
-      var yAxisLabels = d3.extent(colorRecords, function(d) { return d.key; });
+      var yAxisLabels = d3.extent(records, function(d) { return d.key; });
       
       var bar = g.selectAll("g")
-      .data(colorRecords)
+      .data(records)
       .enter().append("g")
         .attr("transform", function(d, i) { return "translate(0," + Math.round( i * barSection + barTop) + ")"; });
         
@@ -67,17 +66,28 @@ function drawBarChart(title, chartId, chartWidth, chartHeight, marginTop, margin
         .attr("height", barHeight - 1)
  //-----------------------------------       
         .on("click",function(d){
+            var barId = "#" + chartId + " g rect";
             if(clickedBar == this){ //No bar is currently selected
-               d3.selectAll("#colors g rect")
+               d3.selectAll(barId)
                    .style("fill", "black");            
                clickedBar = null;
             } else {
-               d3.selectAll("#colors g rect")
+               d3.selectAll(barId)
                    .style("fill", "gray");
                d3.select(this)           
                   .style("fill", "black");                            
                clickedBar = this;
+               dim.filter(function(data){ 
+                  if(data === d.key){
+                     return data;
+                  }
+               });
             }
+            records = dim.group()
+         .reduceSum(function(d){ return d.value; });
+ /*        .all()
+         .sort(function(x, y){ return d3.ascending(x.value, y.value); });
+   */         console.log(records);
         }); 
  //-----------------------------------
 
@@ -95,16 +105,6 @@ function drawBarChart(title, chartId, chartWidth, chartHeight, marginTop, margin
          .attr("y", -margin.top / 2)
          .text(title);
 
-         /*
-      //add click handler
-      chart.selectAll("g rect").on("click", function (d){
-         chart.selectAll("g rect")
-            .attr("class", "excluded");
-         //this.style("fill", "red")// bar.attr("fill", "red");
-         console.log(d);
-   //      d.attr("class", "excluded");
-      }); 
-*/
    });
    
 };

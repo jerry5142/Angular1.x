@@ -14,10 +14,6 @@
    opacity: 1;   
 }
 
-.chart rect .excluded {
-   fill: gray;
-}
-
 .chart text {
    font: 14px sans-serif;
    fill: gray;

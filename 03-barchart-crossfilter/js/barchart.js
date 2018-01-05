@@ -31,7 +31,7 @@ function barcharts(){
    };
 
 //-------------------main----------------------   
-   //get the data and graph it      
+   //get the data     
    d3.json(dataFilePath, function(data) {
       //crossfilter
       var cf = crossfilter(data.data);
@@ -41,7 +41,7 @@ function barcharts(){
       //record groups
       var records1 = groupAndSortDim(dim1);  
       var records2 = groupAndSortDim(dim2);
-      
+      //graph it 
       drawChart(records1, config1, dim1, records2, config2, dim2);     
       drawChart(records2, config2, dim2, records1, config1, dim1);     
    });
@@ -53,7 +53,7 @@ function barcharts(){
    };  
 
    function drawChart(records, config, dim, linkedRecords, linkedConfig, linkedDim){
-      //create an svg window and append a g element to it
+      //set attributes for the svg element and append a g element to it
       var chart = d3.select("#" + config.id).attr("width", config.width).attr("height", config.height),
           margin = {top: config.top, right: config.right, bottom: config.bottom, left: config.left},
           width = +chart.attr("width") - config.left - config.right,
@@ -65,11 +65,12 @@ function barcharts(){
       var xScaleFunction = d3.scale.linear().range([0, width]);
       //set the class for the chart 
       chart.attr("class", "chart");
-
+      //x axis tic increment
       var incr = Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt);
-
+      //set the x-axis data display range
       xScaleFunction.domain([0,  incr * (config.ticCnt + 2)]);
-     
+
+      //divide up the vertical axis to space the bars evenly
       var barSection = (height / records.length);
       var barTop = (barSection - barHeight) / 2;     
       var bar = g.selectAll("g")
@@ -90,7 +91,7 @@ function barcharts(){
       bar.append("rect")
         .attr("width", function(d) { return xScaleFunction(d.value); })
         .attr("height", barHeight - 1)
-        .on({
+        .on({ //mouse events
             "mouseover": function(d) {
               d3.select(this).style("cursor", "pointer"); 
             },
@@ -102,16 +103,16 @@ function barcharts(){
                //a bar was clicked so clear all filters
                dim.filterAll();
                linkedDim.filterAll();
-               //redraw current chart is previous click was on a different chart
+               //redraw current chart if previous click was on a different chart
                if(clickedBar && config.id != clickedBar.viewportElement.id){
                   removeChart("#" + config.id); //clear the old chart
                   drawChart(records, config, dim, linkedRecords, linkedConfig, linkedDim); 
                   clickedBar = null;
-               }else if(clickedBar == this){ //No bar is currently selected
+               }else if(clickedBar == this){ //Same bar was clicked
                   d3.selectAll(barId)
-                      .style("fill", "black"); //how        
+                      .style("fill", "black");       
                   clickedBar = null;
-               } else { //deselect all other bars, save the clicked bar, filter and redraw
+               } else { //make all bars gray then clicked bar black
                   d3.selectAll(barId)
                       .style("fill", "gray");
                   d3.select(this)           

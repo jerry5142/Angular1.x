@@ -1,7 +1,7 @@
-//===========Configuration=============
+//-------------------configuration----------------------   
 var clickedBar = null;
 
-function init(){
+function barcharts(){
    var dataFilePath = "data/dataCat.json";
    
    var config1 = {
@@ -13,7 +13,7 @@ function init(){
       right: 20, 
       bottom: 30, 
       left: 60, 
-      ticIncr: 50,
+      ticCnt: 6,
       category: "category1"
    };
 
@@ -26,10 +26,11 @@ function init(){
       right: 20, 
       bottom: 30, 
       left: 60, 
-      ticIncr: 50,
+      ticCnt: 6,
       category: "category2"
    };
 
+//-------------------main----------------------   
    //get the data and graph it      
    d3.json(dataFilePath, function(data) {
       //crossfilter
@@ -43,9 +44,9 @@ function init(){
       
       drawChart(records1, config1, dim1, records2, config2, dim2);     
       drawChart(records2, config2, dim2, records1, config1, dim1);     
-});
+   });
 
-//------------------------------------------------------------------------   
+//-------------------functions----------------------   
    function removeChart(chartId){
       var allGs = d3.selectAll(chartId + " g");
       allGs.remove();
@@ -60,29 +61,21 @@ function init(){
           g = chart.append("g").attr("transform", "translate(" + config.left + "," + config.top + ")");
             
       var barHeight = height / 6;
-
       //set the axis scales
-      var xScaleFunction = d3.scale.linear()
-          .range([0, width]);
-
+      var xScaleFunction = d3.scale.linear().range([0, width]);
       //set the class for the chart 
       chart.attr("class", "chart");
 
-      var maxXtic = d3.max(records, function(d) { return d.value; });
-      if(maxXtic % config.ticIncr){ // make max axis tic round up to next config.ticIncr
-         maxXtic = maxXtic - (maxXtic % config.ticIncr) + config.ticIncr;
-      }
-      var xTicCount = maxXtic / config.ticIncr;  
-      xScaleFunction.domain([0, maxXtic]);
-      
+      var incr = Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt);
+
+      xScaleFunction.domain([0,  incr * (config.ticCnt + 2)]);
+     
       var barSection = (height / records.length);
-      var barTop = (barSection - barHeight) / 2 ;
-      
-      
+      var barTop = (barSection - barHeight) / 2;     
       var bar = g.selectAll("g")
-      .data(records)
-      .enter().append("g")
-        .attr("transform", function(d, i) { return "translate(0," + Math.round( i * barSection + barTop) + ")"; });
+         .data(records)
+         .enter().append("g")
+         .attr("transform", function(d, i) { return "translate(0," + Math.round( i * barSection + barTop) + ")"; });
       
       //sets the vertical axis labels  
       bar.append("text")
@@ -90,51 +83,51 @@ function init(){
          .attr("x", -10)
          .attr("y", barTop - 5)
          .attr("dy", "0.71em")
-       //  .attr("text-anchor", "end")
-//         .text(function(d){ return d.key; }); 
-         .text(function(d){ return d.value; }); 
+         .text(function(d){ return d.key; }); 
+//         .text(function(d){ return d.value; }); 
       
       //draws the bars
       bar.append("rect")
         .attr("width", function(d) { return xScaleFunction(d.value); })
         .attr("height", barHeight - 1)
-        .on("click",function(d){
-            var barId = "#" + config.id + " g rect";
-            //a bar was clicked so clear all filters
-            dim.filterAll();
-            linkedDim.filterAll();
-            if(clickedBar == this){ //No bar is currently selected
-               d3.selectAll(barId)
-                   .style("fill", "black");            
-               clickedBar = null;
-            } else { //deselect all other bars, save the clicked bar, filter and redraw
-               d3.selectAll(barId)
-                   .style("fill", "gray");
-               d3.select(this)           
-                  .style("fill", "black");                            
-               clickedBar = this; //save the clicked bar
-               dim.filter(d.key);  //filter the selection
+        .on({
+            "mouseover": function(d) {
+              d3.select(this).style("cursor", "pointer"); 
+            },
+            "mouseout": function(d) {
+              d3.select(this).style("cursor", "default"); 
+            },
+            "click": function(d) {
+               var barId = "#" + config.id + " g rect";
+               //a bar was clicked so clear all filters
+               dim.filterAll();
+               linkedDim.filterAll();
+               //redraw current chart is previous click was on a different chart
+               if(clickedBar && config.id != clickedBar.viewportElement.id){
+                  removeChart("#" + config.id); //clear the old chart
+                  drawChart(records, config, dim, linkedRecords, linkedConfig, linkedDim); 
+                  clickedBar = null;
+               }else if(clickedBar == this){ //No bar is currently selected
+                  d3.selectAll(barId)
+                      .style("fill", "black"); //how        
+                  clickedBar = null;
+               } else { //deselect all other bars, save the clicked bar, filter and redraw
+                  d3.selectAll(barId)
+                      .style("fill", "gray");
+                  d3.select(this)           
+                     .style("fill", "black");                            
+                  clickedBar = this; //save the clicked bar
+                  dim.filter(d.key);  //filter the selection
+               }
+               removeChart("#" + linkedConfig.id); //clear the old chart
+               drawChart(linkedRecords, linkedConfig, linkedDim, records, config, dim); //redraw
             }
-            /*
-             //redraw charts if the previous click was on a different chart            
-            if(clickedBar && config.id != clickedBar.viewportElement.id){
-               removeChart("#" + config.id); //clear the old chart
-               drawChart(records, config, dim, linkedRecords, linkedConfig, linkedDim); 
-//               removeChart("#" + linkedConfig.id); //clear the old chart
-//               drawChart(linkedRecords, linkedConfig, linkedDim, records, config, dim); 
-           //    clickedBar = null;
-            }            
-           */
- 
-            
-            removeChart("#" + linkedConfig.id); //clear the old chart
-            drawChart(linkedRecords, linkedConfig, linkedDim, records, config, dim); //redraw
         }); 
 
       //create the x-axis and move it to the bottom of the graph
       g.append("g")
          .attr("transform", "translate(0," + height + ")")
-         .call(d3.svg.axis().scale(xScaleFunction).orient("bottom").ticks(xTicCount).innerTickSize(-height))
+         .call(d3.svg.axis().scale(xScaleFunction).orient("bottom").ticks(config.ticCnt).innerTickSize(-height))
          .attr("class", "axis");      
      
       //add a title

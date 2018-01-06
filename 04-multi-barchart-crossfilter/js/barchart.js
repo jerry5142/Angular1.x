@@ -3,58 +3,14 @@ var clickedBar = null;
 
 function barcharts(){
    var dataFilePath = "data/dataFourCat.json";
-
-   var config1 = {
-      id: "color",
-      title: "Colors",
-      width: 500,
-      height: 300,
-      top: 60, 
-      right: 20, 
-      bottom: 30, 
-      left: 60, 
-      ticCnt: 6,
-      category: "color"
-   };
-
-   var config2 = {
-      id: "letter",
-      title: "Letters",
-      width: 500,
-      height: 300,
-      top: 60, 
-      right: 20, 
-      bottom: 30, 
-      left: 60, 
-      ticCnt: 6,
-      category: "letter"
-   };
-
-   var config3 = {
-      id: "shape",
-      title: "Shapes",
-      width: 500,
-      height: 300,
-      top: 60, 
-      right: 20, 
-      bottom: 30, 
-      left: 60, 
-      ticCnt: 6,
-      category: "shape"
-   };
-
-   var config4 = {
-      id: "country",
-      title: "Countries",
-      width: 500,
-      height: 300,
-      top: 60, 
-      right: 20, 
-      bottom: 30, 
-      left: 60, 
-      ticCnt: 6,
-      category: "country"
-   };
+   var divId = "charts"; //where to draw the charts
+   
+   var configs = [ 
+      {id: "color", title: "Colors", width: 500, height: 300, top: 60, right: 20,  bottom: 30, left: 60, ticCnt: 6, key: "color", value: "members"}, 
+      {id: "letter", title: "Letters", width: 500, height: 300, top: 60, right: 20,  bottom: 30, left: 60, ticCnt: 6, key: "letter", value: "members"},
+      {id: "shape", title: "Shapes", width: 500, height: 300, top: 60, right: 20,  bottom: 30, left: 60, ticCnt: 6, key: "shape", value: "members"},
+      {id: "country", title: "Countries", width: 500, height: 300, top: 60, right: 20, bottom: 30, left: 80, ticCnt: 6, ticCnt: 6, key: "country", value: "members"}
+   ];
 
 //-------------------main----------------------   
    //get the data and graph it      
@@ -62,17 +18,31 @@ function barcharts(){
       //crossfilter
       var cf = crossfilter(data.data);
       //dimensions
-      var dim1 = cf.dimension(function(fact){ return fact[config1.category]; });
-      var dim2 = cf.dimension(function(fact){ return fact[config2.category]; });
+      var dims = [];
       //record groups
-      var records1 = groupAndSortDim(dim1);  
-      var records2 = groupAndSortDim(dim2);
-      
-      drawChart(records1, config1, dim1, records2, config2, dim2);     
-      drawChart(records2, config2, dim2, records1, config1, dim1);     
+      var records = [];
+
+      for(var i=0; i<configs.length; i++){
+         dims[i] = cf.dimension(function(fact){ 
+            return fact[configs[i].key];
+         });
+         records[i] = groupAndSortDim(dims[i], configs[i].value);
+         //create an svg tag for the chart
+         createSVGtag(divId, configs[i].id);
+      }
+
+      //draw the chart
+      drawChart(records[0], configs[0], dims[0], records[1], configs[1], dims[1]);
+      drawChart(records[1], configs[1], dims[1], records[0], configs[0], dims[0]);
+      drawChart(records[2], configs[2], dims[2], records[3], configs[3], dims[3]);
+      drawChart(records[3], configs[3], dims[3], records[2], configs[2], dims[2]);
    });
 
 //-------------------functions----------------------   
+   function createSVGtag(divId, svgId){
+      d3.select("#" + divId).append("svg").attr("id", svgId);
+   }
+
    function removeChart(chartId){
       var allGs = d3.selectAll(chartId + " g");
       allGs.remove();
@@ -165,9 +135,9 @@ function barcharts(){
          .text(config.title);
    };
    
-   function groupAndSortDim(dim){
+   function groupAndSortDim(dim, valueField){
       return dim.group()
-         .reduceSum(function(d){ return d.value; })
+         .reduceSum(function(d){ return d[valueField]; })
          .all()
       .sort(function(x, y){ return d3.ascending(x.index, y.index); });
    };

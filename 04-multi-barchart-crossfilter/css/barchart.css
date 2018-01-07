@@ -9,8 +9,26 @@
    fill: gray;
 }
 
-.chart rect {
+.chart .bar {
    fill: black;
+   opacity: 1;   
+}
+
+.chart .selected, 
+.chart .selected text{
+   fill: blue;
+   font-weight: bold;
+   font-style: italic;
+   opacity: 1;   
+}
+
+.chart .unfiltered {
+   fill: orange;
+   opacity: 1;   
+}
+
+.chart .excluded {
+   fill: gray;
    opacity: 1;   
 }
 

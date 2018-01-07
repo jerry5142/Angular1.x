@@ -1,4 +1,6 @@
 //-------------------configuration----------------------   
+'use strict';
+
 var clickedBar = null;
 
 function barcharts(){
@@ -12,15 +14,16 @@ function barcharts(){
       {id: "country", title: "Countries", width: 500, height: 300, top: 60, right: 20, bottom: 30, left: 80, ticCnt: 6, ticCnt: 6, key: "country", value: "members"}
    ];
 
+   //dimensions
+   var dims = [];
+   //record groups
+   var records = [];
+
 //-------------------main----------------------   
    //get the data and graph it      
    d3.json(dataFilePath, function(data) {
       //crossfilter
       var cf = crossfilter(data.data);
-      //dimensions
-      var dims = [];
-      //record groups
-      var records = [];
 
       for(var i=0; i<configs.length; i++){
          dims[i] = cf.dimension(function(fact){ 
@@ -29,26 +32,38 @@ function barcharts(){
          records[i] = groupAndSortDim(dims[i], configs[i].value);
          //create an svg tag for the chart
          createSVGtag(divId, configs[i].id);
+         //draw the chart
+         drawChart(records[i], configs[i], dims[i]);
       }
-
-      //draw the chart
-      drawChart(records[0], configs[0], dims[0], records[1], configs[1], dims[1]);
-      drawChart(records[1], configs[1], dims[1], records[0], configs[0], dims[0]);
-      drawChart(records[2], configs[2], dims[2], records[3], configs[3], dims[3]);
-      drawChart(records[3], configs[3], dims[3], records[2], configs[2], dims[2]);
    });
 
 //-------------------functions----------------------   
+   function addClickHandlers(){
+      
+   }
+   
    function createSVGtag(divId, svgId){
       d3.select("#" + divId).append("svg").attr("id", svgId);
    }
 
    function removeChart(chartId){
-      var allGs = d3.selectAll(chartId + " g");
+      var allGs = d3.selectAll("#" + chartId + " g");
       allGs.remove();
-   };  
+   }  
 
-   function drawChart(records, config, dim, linkedRecords, linkedConfig, linkedDim){
+   //clears and redraws all charts not in the excludedIds array
+   function redrawCharts(excludedIds){
+      for(var i=0; i<configs.length; i++){
+         excludedIds.forEach(function(id){
+            if(configs[i].id != id){
+               removeChart(configs[i].id);
+               drawChart(records[i], configs[i], dims[i]);
+            }
+         });
+      }
+   }
+   
+   function drawChart(records, config, dim){
       //create an svg window and append a g element to it
       var chart = d3.select("#" + config.id).attr("width", config.width).attr("height", config.height),
           margin = {top: config.top, right: config.right, bottom: config.bottom, left: config.left},
@@ -80,13 +95,20 @@ function barcharts(){
          .attr("y", barTop - 5)
          .attr("dy", "0.71em")
          .text(function(d){ return d.key; }); 
-//         .text(function(d){ return d.value; }); 
-      
+
+      bar.append("text")
+         .attr("class", "chart")
+         .attr("x", function(d) { return xScaleFunction(d.value) + 30; })
+         .attr("y", barTop - 5)
+         .attr("dy", "0.71em")
+         .text(function(d){ return d.value; }); 
+         
       //draws the bars
       bar.append("rect")
-        .attr("width", function(d) { return xScaleFunction(d.value); })
-        .attr("height", barHeight - 1)
-        .on({
+         .attr("class", "bar")
+         .attr("width", function(d) { return xScaleFunction(d.value); })
+         .attr("height", barHeight - 1)
+         .on({
             "mouseover": function(d) {
               d3.select(this).style("cursor", "pointer"); 
             },
@@ -97,26 +119,20 @@ function barcharts(){
                var barId = "#" + config.id + " g rect";
                //a bar was clicked so clear all filters
                dim.filterAll();
-               linkedDim.filterAll();
-               //redraw current chart is previous click was on a different chart
-               if(clickedBar && config.id != clickedBar.viewportElement.id){
-                  removeChart("#" + config.id); //clear the old chart
-                  drawChart(records, config, dim, linkedRecords, linkedConfig, linkedDim); 
-                  clickedBar = null;
-               }else if(clickedBar == this){ //No bar is currently selected
-                  d3.selectAll(barId)
-                      .style("fill", "black"); //how        
+               if(clickedBar == this){ //No bar is currently selected
+                  d3.selectAll(barId)    
+                     .attr("class", "bar")
                   clickedBar = null;
                } else { //deselect all other bars, save the clicked bar, filter and redraw
                   d3.selectAll(barId)
-                      .style("fill", "gray");
+                     .attr("class", "excluded")
                   d3.select(this)           
-                     .style("fill", "black");                            
+                     .attr("class", "selected")
                   clickedBar = this; //save the clicked bar
                   dim.filter(d.key);  //filter the selection
                }
-               removeChart("#" + linkedConfig.id); //clear the old chart
-               drawChart(linkedRecords, linkedConfig, linkedDim, records, config, dim); //redraw
+               //redraw
+               redrawCharts([config.id]);
             }
         }); 
 
@@ -133,14 +149,14 @@ function barcharts(){
          .attr("x", width / 2)             
          .attr("y", -margin.top / 2)
          .text(config.title);
-   };
+   }
    
    function groupAndSortDim(dim, valueField){
       return dim.group()
          .reduceSum(function(d){ return d[valueField]; })
          .all()
       .sort(function(x, y){ return d3.ascending(x.index, y.index); });
-   };
+   }
      
-};
+}
 

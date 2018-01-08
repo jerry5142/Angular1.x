@@ -1,5 +1,5 @@
 'use strict';
-var showVals = false;
+var showVals = true;
 
 function barcharts(){
    var dataFilePath = "data/dataFourCat.json";

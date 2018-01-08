@@ -1,4 +1,5 @@
 'use strict';
+var showVals = false;
 
 function barcharts(){
    var dataFilePath = "data/dataFourCat.json";
@@ -7,10 +8,10 @@ function barcharts(){
 
 //-------------------chart configuration----------------------      
    var configs = [ 
-      {"id": "color", "title": "Colors", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "color", "value": "members"}, 
-      {"id": "letter", "title": "Letters", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "letter", "value": "members"},
-      {"id": "shape", "title": "Shapes", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "shape", "value": "members"},
-      {"id": "country", "title": "Countries", "width": 500, "height": 300, "top": 60, "right": 20, "bottom": 30, "left": 80, "labelOffset": {"x": -10, "y": -10}, "ticCnt": 6, "ticCnt": 6, "key": "country", "value": "members"}
+      {"id": "color", "title": "Colors", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "color", "value": "members", "showVals": showVals}, 
+      {"id": "letter", "title": "Letters", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "letter", "value": "members", "showVals": showVals},
+      {"id": "shape", "title": "Shapes", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "shape", "value": "members", "showVals": showVals},
+      {"id": "country", "title": "Countries", "width": 500, "height": 300, "top": 60, "right": 20, "bottom": 30, "left": 80, "labelOffset": {"x": -10, "y": -10}, "ticCnt": 6, "ticCnt": 6, "key": "country", "value": "members", "showVals": showVals}
    ];
 
 //-------------------main----------------------   
@@ -118,11 +119,14 @@ function barcharts(){
             .attr("y", barTop + config.labelOffset.y)
             .text(function(d){ return d.key; }); 
 
-         bar.append("text")
-            .attr("class", "chart")
-            .attr("x", function(d) { return xScaleFunction(d.value) + 30; })
-            .attr("y", barTop + config.labelOffset.y)
-            .text(function(d){ return d.value; }); 
+         //show/hide bar values   
+         if(config.showVals){
+            bar.append("text")
+               .attr("class", "chart")
+               .attr("x", function(d) { return xScaleFunction(d.value) + 30; })
+               .attr("y", barTop + config.labelOffset.y)
+               .text(function(d){ return d.value; }); 
+         }
 
          bar.append("rect")
             .attr("width", function(d) { return xScaleFunction(d.value); })

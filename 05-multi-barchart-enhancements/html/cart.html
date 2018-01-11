@@ -1,0 +1,10 @@
+<div class="cart-contents">
+   <div ng-repeat="product in products"> 
+      <div class="thumbnail" ng-if="product.selected"> 
+         <img ng-src="{{ product.pic }}"> 
+         <p class="title">{{ product.name }}</p> 
+         <p class="price">{{ product.price | currency }}</p> 
+         <p class="date">{{ product.description }}</p> 
+      </div> 
+   </div>
+</div>

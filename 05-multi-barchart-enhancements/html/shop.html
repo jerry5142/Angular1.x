@@ -1,0 +1,15 @@
+<div class="container">
+   <div ng-repeat="product in products" class="col-md-6"> 
+      <div class="thumbnail"> 
+         <img ng-src="{{ product.pic }}"> 
+         <p class="title">{{ product.name }}</p> 
+         <p class="price">{{ product.price | currency }}</p> 
+         <p class="date">{{ product.description }}</p> 
+         <label><input type="checkbox" ng-model="product.selected" ng-checked="product.selected"/>Add to Cart</label><br><br>
+         <div class"review">
+            <textarea class="review" ng-model="review" ng-blur="alert(review)"></textarea>
+         </div>
+         <h1>{{ review }}</h1>
+      </div> 
+   </div>
+</div>

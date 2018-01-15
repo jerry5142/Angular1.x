@@ -11,7 +11,7 @@ function barcharts(){
       {"id": "color", "title": "Colors", "key": "color", "value": "members"}, 
       {"id": "letter", "title": "Letters", "key": "letter", "value": "members"},
       {"id": "shape", "title": "Shapes", "key": "shape", "value": "members"},
-      {"id": "country", "title": "Countries", "key": "country", "value": "members", "yOffset": -10}
+      {"id": "country", "title": "Countries", "key": "country", "value": "members", "left": 80, "yOffset": -10}
    ];
 
 //-------------------main----------------------   
@@ -31,7 +31,7 @@ function barcharts(){
 //-------------------chart object---------------------- 
    var makeChart = function(crossfilter, chartDivId, chartConfig){
       //---private vars---
-      var clickedBar = null; //holds reference to the currently selected bar 
+      var isBarSelected = false;
       //put default config values here. They will be used if chartConfig does not have them
       var defaultConfigs = {"width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "xOffset": -10, "yOffset": 5, "ticCnt": 6};
       //configuration data for the chart
@@ -75,21 +75,19 @@ function barcharts(){
                "mouseout": function(d) {
                   d3.select(this).style("cursor", "default"); 
                },
-               "click": function(d) {
+               "click": function(d) { //handle bar click
                   var barId = "#" + config.id + " g .bar";
-                  //a bar was clicked so clear all filters
-                  dim.filterAll();
-                  if(clickedBar == this){ //No bar is currently selected
-                     d3.selectAll(barId)    
-                        .attr("class", "bar")
-                     clickedBar = null;
-                  } else { //deselect other bars, save clicked bar, filter and redraw
+                  dim.filterAll(); //clear all filters
+                  isBarSelected = !isBarSelected; //toggle flag
+                  if(isBarSelected){ //No bar is currently selected
                      d3.selectAll(barId)
                         .attr("class", "bar excluded")
                      d3.select(this)           
                         .attr("class", "bar selected")
-                     clickedBar = this; //save the clicked bar
                      dim.filter(d.key);  //filter the selection
+                  } else { //deselect other bars, save clicked bar, filter and redraw
+                     d3.selectAll(barId)    
+                        .attr("class", "bar")
                   }
                   //redraw all chart objects
                   barChartsArray.forEach(function(chart){chart();});

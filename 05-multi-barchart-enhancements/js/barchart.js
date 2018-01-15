@@ -8,10 +8,10 @@ function barcharts(){
 
 //-------------------chart configuration----------------------      
    var configs = [ 
-      {"id": "color", "title": "Colors", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "color", "value": "members"}, 
-      {"id": "letter", "title": "Letters", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "letter", "value": "members"},
-      {"id": "shape", "title": "Shapes", "width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "labelOffset": {"x": -10, "y": 5}, "ticCnt": 6, "key": "shape", "value": "members"},
-      {"id": "country", "title": "Countries", "width": 500, "height": 300, "top": 60, "right": 20, "bottom": 30, "left": 80, "labelOffset": {"x": -10, "y": -10}, "ticCnt": 6, "ticCnt": 6, "key": "country", "value": "members"}
+      {"id": "color", "title": "Colors", "key": "color", "value": "members"}, 
+      {"id": "letter", "title": "Letters", "key": "letter", "value": "members"},
+      {"id": "shape", "title": "Shapes", "key": "shape", "value": "members"},
+      {"id": "country", "title": "Countries", "key": "country", "value": "members", "yOffset": -10}
    ];
 
 //-------------------main----------------------   
@@ -32,7 +32,10 @@ function barcharts(){
    var makeChart = function(crossfilter, chartDivId, chartConfig){
       //---private vars---
       var clickedBar = null; //holds reference to the currently selected bar 
-      var config = chartConfig; //configuration data for the chart
+      //put default config values here. They will be used if chartConfig does not have them
+      var defaultConfigs = {"width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "xOffset": -10, "yOffset": 5, "ticCnt": 6};
+      //configuration data for the chart
+      var config = setConfigVals(chartConfig);
       //create the dimension on the key field
       var dim = crossfilter.dimension(function(fact){ return fact[config.key];});
       //separate group reference to change x-axis values later
@@ -57,7 +60,7 @@ function barcharts(){
       chart.attr("class", "chart"); 
       //scale the x-axis data values so they fit on the chart
       scaleXvalues(); 
-
+              
       //---make the chart---   
       function drawChart() {
          barParent = g.selectAll("g")
@@ -96,15 +99,15 @@ function barcharts(){
          //sets the vertical axis labels  
          bar.append("text")
             .attr("class", "chart yLabels")
-            .attr("x", config.labelOffset.x)
-            .attr("y", barTop + config.labelOffset.y)
+            .attr("x", config.xOffset)
+            .attr("y", barTop + config.yOffset)
             .text(function(d){ return d.key; }); 
 
          //show/hide bar values for debugging
          if(showVals){
             bar.append("text")
                .attr("class", "chart xValues")
-               .attr("y", barTop + config.labelOffset.y);
+               .attr("y", barTop + config.yOffset);
          }
 
          bar.append("rect")
@@ -131,7 +134,7 @@ function barcharts(){
          //redraw values
          if(showVals){ //show/hide bar values   
             barParent.selectAll(".chart .xValues")
-               .attr("x", function(d) { return xScaleFunction(d.value) + -5*config.labelOffset.x; })
+               .attr("x", function(d) { return xScaleFunction(d.value) + -5*config.xOffset; })
                .text(function(d){ return d.value; }); 
          }
          //redraw bars
@@ -150,6 +153,17 @@ function barcharts(){
       //scale the range for the x-axis values
       function scaleXvalues(){
          xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
+      }
+      
+      //adds default configs if newConfig doesn't have them
+      function setConfigVals(newConfig){
+         for (var key in defaultConfigs) {
+            //add default config value if newConfig does not have it
+            if (!newConfig.hasOwnProperty(key)) {
+               newConfig[key] = defaultConfigs[key];
+            }
+         }
+         return newConfig;
       }
       
       //---public functions---

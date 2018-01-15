@@ -6,7 +6,8 @@
    padding: 0px; /*50px 10px ;*/
 }
 
-.chart {
+.chart,
+.chart .yLabels {
    border: solid 1px;
    border-color: gray;
    margin: 30px;

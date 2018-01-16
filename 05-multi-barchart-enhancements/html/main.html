@@ -1,7 +1,8 @@
 <div class="home">
-      <div class="xAxisSelect">
-         <label><input type="radio" name="xAxisSelect" value="members"> Members</label>
-         <label><input type="radio" name="xAxisSelect" value="funds" selected> Funds</label><br>
-      </div> 
-      <div id="charts" class="container"></div>      		         
+   <div class="xAxisSelect">
+      <label ng-repeat="value in axisSelect.values" class="radioButton">
+         <input type="radio" ng-model="axisSelect.name" ng-value="value" ng-click="handleClick()" ng-checked="value==defaultButton"> {{value}}
+      </label>
+   </div>
+   <div id="charts" class="container"></div>      
 </div>

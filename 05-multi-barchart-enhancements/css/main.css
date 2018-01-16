@@ -72,3 +72,8 @@
 .xAxisSelect {
    margin-top: 100px;
 }
+
+.radioButton {
+   text-transform: capitalize;
+    font-weight: bold;
+}

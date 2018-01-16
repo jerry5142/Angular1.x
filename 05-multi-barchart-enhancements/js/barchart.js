@@ -1,10 +1,16 @@
 'use strict';
 var showVals = true;
+var barChartsArray = []; //stores all chart objects
+
+function changeXaxis(axisKey){
+   barChartsArray.forEach(function(chart){
+      chart.setXaxisValue(axisKey);
+   });  
+}
 
 function barcharts(){
    var dataFilePath = "data/dataFourCat.json";
    var divId = "charts"; //where to draw the charts
-   var barChartsArray = []; //stores all chart objects
 
 //-------------------chart configuration----------------------      
    var configs = [ 
@@ -25,7 +31,6 @@ function barcharts(){
          barChartsArray.push(chart);         
          chart(); //draw the chart
       });
-      barChartsArray[0].setXaxisValue("funds");
    });
 
 //-------------------chart object---------------------- 
@@ -56,11 +61,12 @@ function barcharts(){
           barTop = (barSection - barHeight) / 2, 
           barParent,
           bar;
+  
       //set the chart class
       chart.attr("class", "chart"); 
       //scale the x-axis data values so they fit on the chart
       scaleXvalues(); 
-              
+      
       //---make the chart---   
       function drawChart() {
          barParent = g.selectAll("g")
@@ -71,9 +77,52 @@ function barcharts(){
             .on({ //event handlers
                "mouseover": function(d) {
                   d3.select(this).style("cursor", "pointer"); 
+                    //---------------------------
+                  d3.select(this)
+                    .transition()
+                    .duration(500)
+                    .attr("x", width/2) //function(d) { return x(d.cocoa) - 30; })
+                    .attr("width", 60);
+                  d3.select(this)
+                     .append("div")
+                     .attr("class", "mytooltip")
+                     .style("opacity", "0")
+                     .style("display", "none")
+                     .transition()  //Opacity transition when the tooltip appears
+                     .duration(500)
+                     .style("opacity", "1")                           
+                     .style("display", "block");  //The tooltip appears
+                  d3.select(this)
+                     .append("div")
+                     .attr("class", "mytooltip")
+                     .style("opacity", "0")
+                     .style("display", "none")
+                     .text("Testing")
+                     /*
+                     .html(
+                     "<div id='thumbnail'>Members: </div>")
+*/                     .style("left", 30 + "px")   
+                     .style("top", 30 + "px");    
+                     
                },
                "mouseout": function(d) {
                   d3.select(this).style("cursor", "default"); 
+                  //---------------------------
+                  d3.select(this)
+                     .transition()
+                     .duration(500)
+                     .attr("x", function(d) { return 20; })
+                     .style("cursor", "normal")
+                     .attr("width", 40)
+                  d3.select(this)
+                     .append("div")
+                     .attr("class", "mytooltip")
+                     .style("opacity", "0")
+                     .style("display", "none")
+                     .transition()  //Opacity transition when the tooltip disappears
+                     .duration(500)
+                     .style("opacity", "0")            
+                     .style("display", "none")  //The tooltip disappears
                },
                "click": function(d) { //handle bar click
                   var barId = "#" + config.id + " g .bar";
@@ -165,11 +214,11 @@ function barcharts(){
       }
       
       //---public functions---
-      drawChart.setXaxisValue = function(xAxisValue){
-         if(!xAxisValue){ //nothing to do
+      drawChart.setXaxisValue = function(axisKey){
+         if(!axisKey){ //nothing to do
             return; 
          }
-         config.value = xAxisValue; //set the new config value
+         config.value = axisKey; //set the new config value
          setRecords(); //regroup the records based on the new value
          scaleXvalues(); //rescale the x-axis range for the new values
          drawChart(); //redraw the chart

@@ -1,4 +1,12 @@
 app.controller('MainController', ['$scope', function($scope) { 
-//   $scope.banner = "The place to buy anything you need.";
-//   $scope.logo = "img/home/shop.png";
- }]);
+   $scope.axisSelect = {
+      name : "axisSelect",
+      values : ["members", "funds"]
+   };
+   //set the default button
+   $scope.defaultButton = $scope.axisSelect.values[0];
+   
+   $scope.handleClick = function(){
+      changeXaxis(this.value);
+   };
+}]);

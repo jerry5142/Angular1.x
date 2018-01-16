@@ -1,7 +1,7 @@
-var app = angular.module("storeApp", ["ngRoute", "ngStorage"]);
+var app = angular.module("barchart", ["ngRoute", "ngStorage"]);
 
 app.controller('IndexController', ['$scope', function($scope, $localStorage){
-   $scope.title = 'Gotta Have It!';
+   $scope.title = 'Bar Charts';
 }]);
 
 app.config(function($routeProvider) { 

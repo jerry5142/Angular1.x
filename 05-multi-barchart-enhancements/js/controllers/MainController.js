@@ -1,29 +1,24 @@
 app.controller('MainController', ['$scope', function($scope) { 
    $scope.resetName = "Reset All";
-   $scope.axisSelect = {
+   
+   $scope.radioConfig = {
       name : "axisSelect",
-      values : ["members", "funds"]
+      values : ["members", "funds"],
+      default : "members"
    };
-   //set the default button
-   $scope.defaultButton = $scope.axisSelect.values[0];
    
-   $scope.isDefault = function(value){
-      console.log(value);
-   }
-   
+   $scope.radioConfigCopy = angular.copy($scope.radioConfig);
+
    $scope.resetAll = function(){
-      //clear all filters for each chart
-      barChartsArray.forEach(function(chart){
-         chart.clearFilters();
-      }); 
-      barChartsArray.forEach(function(chart){
-         chart.resetChart();
-      }); 
+      $scope.radioConfigCopy = angular.copy($scope.radioConfig);      
+      resetAllCharts($scope.radioConfigCopy.default);
    }
    
    $scope.handleClick = function(value){
       barChartsArray.forEach(function(chart){
          chart.setXaxisValue(value);
+//         chart.scaleXaxis();
+         chart.redraw();
       }); 
    };
    

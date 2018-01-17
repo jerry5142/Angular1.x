@@ -35,6 +35,11 @@
    background-color: #F0F0F0;     
 }
 
+button {
+   padding: 7px;
+   background-color: tan;   
+}
+
 .radioButton, button {
    text-transform: capitalize;
    font-weight: bold;

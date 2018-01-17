@@ -1,16 +1,14 @@
 .container {
-   margin: 0px;
    display: grid;
    grid-template-columns: auto auto;
    background-color: white;
-   padding: 0px; /*50px 10px ;*/
 }
 
 .chart,
 .chart .yLabels {
    border: solid 1px;
    border-color: gray;
-   margin: 30px;
+   margin: 10px;
 }
 
 .chart .chartTitle {

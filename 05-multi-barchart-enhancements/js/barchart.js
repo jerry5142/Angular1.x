@@ -2,12 +2,6 @@
 var showVals = true;
 var barChartsArray = []; //stores all chart objects
 
-function changeXaxis(axisKey){
-   barChartsArray.forEach(function(chart){
-      chart.setXaxisValue(axisKey);
-   });  
-}
-
 function barcharts(){
    var dataFilePath = "data/dataFourCat.json";
    var divId = "charts"; //where to draw the charts
@@ -48,27 +42,17 @@ function barcharts(){
       //generate and sort the records
       var records = setRecords();
       //set the chart margins and teh initial g element
-      var chart = d3.select("#" + chartDivId).append("svg").attr("id", config.id)
-            .attr("width", config.width).attr("height", config.height),
-          margin = {top: config.top, right: config.right, bottom: config.bottom, left: config.left},
-          width = +chart.attr("width") - config.left - config.right,
-          height = +chart.attr("height") - config.top - config.bottom,
-          g = chart.append("g").attr("transform", "translate(" + config.left + "," + config.top + ")");
+      var chart, margin, width, height, g;
       //function to set the xaxis scale based on width var
-      var xScaleFunction = d3.scale.linear().range([0, width]);  
-      var barHeight = height / 6, 
-          barSection = (height / records.length), 
-          barTop = (barSection - barHeight) / 2, 
-          barParent,
-          bar;
-  
-      //set the chart class
-      chart.attr("class", "chart"); 
-      //scale the x-axis data values so they fit on the chart
-      scaleXvalues(); 
+      var xScaleFunction;
+      var barHeight, barSection, barTop, barParent, bar, barId;
+      
+      init(); //init vars
       
       //---make the chart---   
       function drawChart() {
+         //scale the x-axis data values so they fit on the chart
+         scaleXvalues(); 
          barParent = g.selectAll("g")
             .data(records);
          bar = barParent.enter().append("g")
@@ -78,7 +62,7 @@ function barcharts(){
                "mouseover": function(d) {
                   d3.select(this).style("cursor", "pointer"); 
                     //---------------------------
-                  d3.select(this)
+/*                  d3.select(this)
                     .transition()
                     .duration(500)
                     .attr("x", width/2) //function(d) { return x(d.cocoa) - 30; })
@@ -99,16 +83,16 @@ function barcharts(){
                      .style("display", "none")
                      .text("Testing")
                      /*
-                     .html(
-                     "<div id='thumbnail'>Members: </div>")
-*/                     .style("left", 30 + "px")   
-                     .style("top", 30 + "px");    
-                     
+//                     .html(
+//                     "<div id='thumbnail'>Members: </div>")
+//                     .style("left", 30 + "px")   
+//                     .style("top", 30 + "px");    
+*/                     
                },
                "mouseout": function(d) {
                   d3.select(this).style("cursor", "default"); 
                   //---------------------------
-                  d3.select(this)
+/*                  d3.select(this)
                      .transition()
                      .duration(500)
                      .attr("x", function(d) { return 20; })
@@ -123,9 +107,9 @@ function barcharts(){
                      .duration(500)
                      .style("opacity", "0")            
                      .style("display", "none")  //The tooltip disappears
+*/
                },
                "click": function(d) { //handle bar click
-                  var barId = "#" + config.id + " g .bar";
                   dim.filterAll(); //clear all filters
                   isBarSelected = !isBarSelected; //toggle flag
                   if(isBarSelected){ //No bar is currently selected
@@ -213,6 +197,22 @@ function barcharts(){
          return newConfig;
       }
       
+      //initialize svg container, variables, etc;
+      function init(){
+         chart = d3.select("#" + chartDivId).append("svg").attr("id", config.id)
+            .attr("width", config.width).attr("height", config.height);
+         margin = {top: config.top, right: config.right, bottom: config.bottom, left: config.left};
+         width = +chart.attr("width") - config.left - config.right;
+         height = +chart.attr("height") - config.top - config.bottom;
+         g = chart.append("g").attr("transform", "translate(" + config.left + "," + config.top + ")");
+         xScaleFunction = d3.scale.linear().range([0, width]);  
+         barHeight = height / 6;
+         barSection = (height / records.length);
+         barTop = (barSection - barHeight) / 2;
+         barId = "#" + config.id + " g .bar"; //sets the id for selecting bars via selectAll()
+         chart.attr("class", "chart"); //set the chart class
+      }
+      
       //---public functions---
       drawChart.setXaxisValue = function(axisKey){
          if(!axisKey){ //nothing to do
@@ -222,6 +222,17 @@ function barcharts(){
          setRecords(); //regroup the records based on the new value
          scaleXvalues(); //rescale the x-axis range for the new values
          drawChart(); //redraw the chart
+      }
+      
+      //clears filters and redraws chart
+      drawChart.resetChart = function(){
+         d3.selectAll(barId).attr("class", "bar"); //reset the bar class (unfiltered)
+         isBarSelected = false; //turn off filter flag
+         drawChart(); //redraw the chart
+      }
+      
+      drawChart.clearFilters = function(){
+         dim.filterAll(); //clear all filters on the chart     
       }
       
       //return the chart object

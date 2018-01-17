@@ -1,8 +1,9 @@
 <div class="home">
    <div class="xAxisSelect">
+      <button ng-click="resetAll()"> {{resetName}}</button>
       <label ng-repeat="value in axisSelect.values" class="radioButton">
-         <input type="radio" ng-model="axisSelect.name" ng-value="value" ng-click="handleClick()" ng-checked="value==defaultButton"> {{value}}
+         <input type="radio" ng-model="axisSelect.name" name="value" ng-change="handleClick(this)" ng-checked="value==defaultButton"> {{value}}
       </label>
    </div>
-   <div id="charts" class="container"></div>      
+   <div id="charts" class="container"></div>
 </div>

@@ -64,6 +64,7 @@ function barcharts(){
       var chart, margin, width, height, g;
       //function to set the xaxis scale based on width var
       var xScaleFunction;
+      var initialScales;
       var barHeight, barSection, barTop, barParent, bar, barId;
       
       init(); //init vars
@@ -191,7 +192,7 @@ function barcharts(){
          barParent.exit().remove();
       }
 
-      //---private functions---
+//---private functions---
       //reduce on the x-axis value, generate and sort the records
       function setRecords(selectedGroup){
          return dim.group().reduceSum(function(d){ return d[selectedGroup]; }).all()
@@ -205,8 +206,11 @@ function barcharts(){
 */      
       //scale the range for the x-axis values
       function scaleXvalues(){
-         xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
+         return xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
       }
+/*      function scaleXvalues(){
+         return xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
+      } */
       
       //adds default configs if newConfig doesn't have them
       function setConfigVals(newConfig){
@@ -240,8 +244,20 @@ function barcharts(){
          barId = "#" + config.id + " g .bar"; //sets the id for selecting bars via selectAll()
          chart.attr("class", "chart"); //set the chart class
          scaleXvalues(); 
+         initialScales = saveInitialScales(["members", "funds"]);
       }
-      
+
+      //saves the initial xAxis scales for each possible xAxis value before filtering
+      //passed to scaleXvalues() when switching axis values
+      function saveInitialScales(allRecords){
+         var scales = {};
+         ["members", "funds"].forEach(function(key){
+            //add default config value if newConfig does not have it
+            scales[key] = (config.ticCnt + 2) * (Math.floor(d3.max(allRecords[key], function(d) { return d.value; }) / config.ticCnt));
+         });
+         return scales;
+      }     
+       
       //---public functions---
       //redraw the chart
       drawChart.redraw = function(){
@@ -256,8 +272,9 @@ function barcharts(){
          }
          config.value = axisKey; //set the new config value
          barParent.exit().remove();
-         barParent.data(records).enter();   
+//         barParent.data(records).enter();   
          records = allRecords[axisKey]; //regroup the records based on the new value  
+         barParent.data(records).enter();   
          scaleXvalues(); //rescale the x-axis range for the new values                        
       }
       

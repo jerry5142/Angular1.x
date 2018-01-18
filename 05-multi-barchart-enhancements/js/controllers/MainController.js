@@ -11,13 +11,15 @@ app.controller('MainController', ['$scope', function($scope) {
 
    $scope.resetAll = function(){
       $scope.radioConfigCopy = angular.copy($scope.radioConfig);      
-      resetAllCharts($scope.radioConfigCopy.default);
+      resetAllCharts($scope.radioConfigCopy.default);     
    }
    
    $scope.handleClick = function(value){
       barChartsArray.forEach(function(chart){
          chart.setXaxisValue(value);
-//         chart.scaleXaxis();
+      }); 
+      barChartsArray.forEach(function(chart){
+         chart.scaleXaxis();
          chart.redraw();
       }); 
    };

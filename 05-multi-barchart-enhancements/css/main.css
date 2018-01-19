@@ -1,0 +1,46 @@
+.navbar {
+   margin: 5px;
+   border: 1px solid gray;
+   padding: 5px;
+   box-shadow: 2px 5px gray;
+   background-color: lightgray;
+   position: fixed; /* Set the navbar to fixed position */
+   top: 0; /* Position the navbar at the top of the page */
+   width: 95%; 
+}
+
+/* Links inside the navbar */
+.navbar-option a {
+   font-family: Courier bold;
+   font-size: 20px;
+   color: black;
+   font-weight: bold;
+   float: left;
+   display: block;
+   text-align: center;
+   padding: 10px;
+   text-decoration: none;
+}
+
+.main-view {
+   margin-top: 0px; /* Add a top margin to avoid content overlay */
+} 
+
+.xAxisSelect {
+   width: 250px;
+   margin: 75px 0px 0px 30px;
+   padding: 10px;
+   border: solid 1px;
+   border-color: gray;
+   background-color: #F0F0F0;     
+}
+
+button {
+   padding: 7px;
+   background-color: tan;   
+}
+
+.radioButton, button {
+   text-transform: capitalize;
+   font-weight: bold;
+}

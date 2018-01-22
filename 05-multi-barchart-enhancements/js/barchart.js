@@ -90,6 +90,7 @@ function barcharts(setFilters){
                       .style("opacity", 0);	
                },
                "click": function(d) { //handle bar click
+                  dim.filterAll(); //clear all filters               
                   if(filters[d.key] === d.key){ //is currently selected so deselect it
                      d3.selectAll(barId)    
                         .attr("class", "bar");
@@ -102,7 +103,6 @@ function barcharts(setFilters){
                      dim.filter(d.key);  //filter the selection
                      filters[d.key] = d.key;
                   }
-                  dim.filterAll(); //clear all filters
                   updateFilterDisplay(filters[d.key]);
                   //redraw all chart objects
                   barChartsArray.forEach(function(chart){chart();});

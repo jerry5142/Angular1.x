@@ -1,6 +1,18 @@
 'use strict';
+//-------------------chart configuration----------------------      
+   var dataFilePath = "data/dataFourCat.json";
+   var divId = "charts"; //where to draw the charts
+   var configs = [ 
+      {"id": "color", "title": "Colors", "key": "color", "value": "members"}, 
+      {"id": "letter", "title": "Letters", "key": "letter", "value": "members"},
+      {"id": "shape", "title": "Shapes", "key": "shape", "value": "members"},
+      {"id": "country", "title": "Countries", "key": "country", "value": "members", "left": 80, "yOffset": -10}
+   ];
+   
+//-------------------globals----------------------   
 var showVals = true;
 var barChartsArray = []; //stores all chart objects
+var filters = {};
 
 function resetAllCharts(axisKey){
    //we have to clear all filters and reset the state of of each chart before redrawing them
@@ -12,18 +24,7 @@ function resetAllCharts(axisKey){
    });   
 };
 
-function barcharts(){
-   var dataFilePath = "data/dataFourCat.json";
-   var divId = "charts"; //where to draw the charts
-
-//-------------------chart configuration----------------------      
-   var configs = [ 
-      {"id": "color", "title": "Colors", "key": "color", "value": "members"}, 
-      {"id": "letter", "title": "Letters", "key": "letter", "value": "members"},
-      {"id": "shape", "title": "Shapes", "key": "shape", "value": "members"},
-      {"id": "country", "title": "Countries", "key": "country", "value": "members", "left": 80, "yOffset": -10}
-   ];
-
+function barcharts(setFilters){
 //-------------------main----------------------   
    //get the data and graph it      
    d3.json(dataFilePath, function(data) {
@@ -31,6 +32,7 @@ function barcharts(){
       var chart;
       
       configs.forEach(function(config){
+         filters[config.key] = null;
          chart = makeChart(cf, divId, config);
          barChartsArray.push(chart);         
          chart(); //draw the chart
@@ -40,7 +42,6 @@ function barcharts(){
 //-------------------chart object---------------------- 
    var makeChart = function(crossfilter, chartDivId, chartConfig){
       //---private vars---
-      var isBarSelected = false;
       //put default config values here. They will be used if chartConfig does not have them
       var defaultConfigs = {"width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "xOffset": -10, "yOffset": 5, "ticCnt": 6};
       //configuration data for the chart
@@ -120,18 +121,20 @@ function barcharts(){
 */
                },
                "click": function(d) { //handle bar click
-                  dim.filterAll(); //clear all filters
-                  isBarSelected = !isBarSelected; //toggle flag
-                  if(isBarSelected){ //No bar is currently selected
+                  if(filters[d.key] === d.key){ //is currently selected so deselect it
+                     d3.selectAll(barId)    
+                        .attr("class", "bar");
+                     filters[d.key] = "";                        
+                  } else { //deselect other bars, save clicked bar, filter and redraw
                      d3.selectAll(barId)
                         .attr("class", "bar excluded")
                      d3.select(this)           
                         .attr("class", "bar selected")
                      dim.filter(d.key);  //filter the selection
-                  } else { //deselect other bars, save clicked bar, filter and redraw
-                     d3.selectAll(barId)    
-                        .attr("class", "bar")
+                     filters[d.key] = d.key;
                   }
+                  dim.filterAll(); //clear all filters
+                  updateFilterDisplay(filters[d.key]);
                   //redraw all chart objects
                   barChartsArray.forEach(function(chart){chart();});
                }
@@ -180,7 +183,7 @@ function barcharts(){
          }
          //redraw bars
          barParent.selectAll("rect")
-            .attr("width", function(d) { return xScaleFunction(d.value); });
+            .attr("width", function(d) { return xScaleFunction(d.value); });  
       }
 
       //---private functions---
@@ -221,6 +224,29 @@ function barcharts(){
          barTop = (barSection - barHeight) / 2;
          barId = "#" + config.id + " g .bar"; //sets the id for selecting bars via selectAll()
          chart.attr("class", "chart"); //set the chart class
+         filters[config.key] = null; //set initial filter state
+         d3.select("#chartFilters")
+            .append("div")
+               .append("label")
+                  .attr("id", config.key + "FilterName")
+                  .attr("class", "filterBox")
+                  .html("<label>" + config.key + "</label>")
+               .append("label")
+                  .attr("id", config.key + "FilterValue")
+                  .attr("class", "filterBox")
+                  .html("<label>---</label>");               
+      }
+      
+      function updateFilterDisplay(filterVal){
+         var val = "---";
+         var classes = "filterBox";
+         if(filterVal){
+            val = filterVal;
+            classes += " filterSelected";
+         }
+          d3.select("#" + config.key + "FilterValue")
+            .attr("class", classes)
+            .html("<label>" + val + "</label>");
       }
       
       //---public functions---
@@ -242,8 +268,9 @@ function barcharts(){
       drawChart.resetChart = function(axisKey){
          dim.filterAll(); //clear all filters on the chart     
          d3.selectAll(barId).attr("class", "bar"); //reset the bar class (unfiltered)
-         isBarSelected = false; //turn off filter flag         
          drawChart.setXaxisValue(axisKey);
+         filters[config.key] = "";
+         updateFilterDisplay("");
       }
       
       //return the chart object

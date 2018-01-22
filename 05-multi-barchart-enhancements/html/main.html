@@ -1,9 +1,10 @@
-<div class="home">
-   <div class="xAxisSelect">
+<div class="chartControlsContainer">
+   <div id="chartControls" class="xAxisSelect">
       <button ng-click="resetAll()"> {{resetName}}</button>
       <label ng-repeat="value in radioConfigCopy.values" class="radioButton">
          <input type="radio" ng-id="value" ng-model="radioConfigCopy.name" ng-value="value" ng-change="handleClick(value)"> {{value}}
       </label>
    </div>
-   <div id="charts" class="container"></div>
+   <div id="chartFilters" class="filterContainer"></div>
 </div>
+<div id="charts" class="container"></div>

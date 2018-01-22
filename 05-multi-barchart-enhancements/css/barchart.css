@@ -2,6 +2,7 @@
    display: grid;
    grid-template-columns: auto auto;
    background-color: white;
+   margin-left: 0;
 }
 
 .chart,

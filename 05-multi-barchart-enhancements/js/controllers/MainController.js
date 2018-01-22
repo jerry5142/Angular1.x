@@ -16,12 +16,12 @@ app.controller('MainController', ['$scope', function($scope) {
    
    $scope.handleClick = function(value){
       barChartsArray.forEach(function(chart){
-         chart.setXaxisValue(value);
-//         chart.scaleXaxis();
+         chart.setXaxisValue(value);   
          chart.redraw();
       }); 
    };
    
    //create the charts
    barcharts();
+
 }]);

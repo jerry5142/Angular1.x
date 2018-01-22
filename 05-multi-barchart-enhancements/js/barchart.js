@@ -8,7 +8,6 @@ function resetAllCharts(axisKey){
       chart.resetChart(axisKey);
    });
    barChartsArray.forEach(function(chart){ 
-      chart.scaleXaxis();
       chart.redraw();
    });   
 };
@@ -48,23 +47,14 @@ function barcharts(){
       var config = setConfigVals(chartConfig);
       //create the dimension on the key field
       var dim = crossfilter.dimension(function(fact){ return fact[config.key];});
-      
-//      var testGroups = dim.group().all();
       //separate group reference to change x-axis values later
-//      var group = dim.group(); 
-      var groups = {
-            "members" : "",
-            "funds" : ""
-         };
+      var group = dim.group(); 
       //generate and sort the records
-//      var records = setRecords();
-      var allRecords = {};
-      var records;
+      var records = setRecords();
       //set the chart margins and teh initial g element
       var chart, margin, width, height, g;
       //function to set the xaxis scale based on width var
       var xScaleFunction;
-      var initialScales;
       var barHeight, barSection, barTop, barParent, bar, barId;
       
       init(); //init vars
@@ -72,7 +62,7 @@ function barcharts(){
       //---make the chart---   
       function drawChart() {
          //scale the x-axis data values so they fit on the chart
-//         scaleXvalues(); 
+         scaleXvalues(); 
          barParent = g.selectAll("g")
             .data(records);
          bar = barParent.enter().append("g")
@@ -178,6 +168,9 @@ function barcharts(){
             .attr("y", -margin.top / 2)
             .text(config.title);
 
+         //what to do on exit
+         barParent.exit().remove();
+         
          //---what to do on update code---
          //redraw values
          if(showVals){ //show/hide bar values   
@@ -188,29 +181,20 @@ function barcharts(){
          //redraw bars
          barParent.selectAll("rect")
             .attr("width", function(d) { return xScaleFunction(d.value); });
-         //what to do on exit
-         barParent.exit().remove();
       }
 
-//---private functions---
+      //---private functions---
       //reduce on the x-axis value, generate and sort the records
-      function setRecords(selectedGroup){
-         return dim.group().reduceSum(function(d){ return d[selectedGroup]; }).all()
-            .sort(function(x, y){ return d3.ascending(x.index, y.index); });         
-      }
-/*      function setRecords(){
+      function setRecords(){
          return group
             .reduceSum(function(d){ return d[config.value]; }).all()
             .sort(function(x, y){ return d3.ascending(x.index, y.index); });         
       }
-*/      
+      
       //scale the range for the x-axis values
       function scaleXvalues(){
-         return xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
+         xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
       }
-/*      function scaleXvalues(){
-         return xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
-      } */
       
       //adds default configs if newConfig doesn't have them
       function setConfigVals(newConfig){
@@ -225,12 +209,6 @@ function barcharts(){
       
       //initialize svg container, variables, etc;
       function init(){
-//         groups.members = dim.group().reduceSum(function(d){ return d["members"]; });
-//         dim.group().dispose();
-//         groups.funds = dim.group().reduceSum(function(d){ return d["funds"]; });
-         allRecords["members"] = setRecords("members");
-         allRecords["funds"] = setRecords("funds");
-         records = allRecords[config.value];
          chart = d3.select("#" + chartDivId).append("svg").attr("id", config.id)
             .attr("width", config.width).attr("height", config.height);
          margin = {top: config.top, right: config.right, bottom: config.bottom, left: config.left};
@@ -243,43 +221,21 @@ function barcharts(){
          barTop = (barSection - barHeight) / 2;
          barId = "#" + config.id + " g .bar"; //sets the id for selecting bars via selectAll()
          chart.attr("class", "chart"); //set the chart class
-         scaleXvalues(); 
-         initialScales = saveInitialScales(["members", "funds"]);
       }
-
-      //saves the initial xAxis scales for each possible xAxis value before filtering
-      //passed to scaleXvalues() when switching axis values
-      function saveInitialScales(allRecords){
-         var scales = {};
-         ["members", "funds"].forEach(function(key){
-            //add default config value if newConfig does not have it
-            scales[key] = (config.ticCnt + 2) * (Math.floor(d3.max(allRecords[key], function(d) { return d.value; }) / config.ticCnt));
-         });
-         return scales;
-      }     
-       
+      
       //---public functions---
       //redraw the chart
       drawChart.redraw = function(){
-//         records[config.value] = setRecords(config.value); //regroup the records based on the new value
-//         scaleXvalues(); //rescale the x-axis range for the new values
+         setRecords(); //regroup the records based on the new value
+         scaleXvalues(); //rescale the x-axis range for the new values
          drawChart();
       }
-
+      
       drawChart.setXaxisValue = function(axisKey){
          if(!axisKey){ //nothing to do
             return; 
          }
          config.value = axisKey; //set the new config value
-         barParent.exit().remove();
-//         barParent.data(records).enter();   
-         records = allRecords[axisKey]; //regroup the records based on the new value  
-         barParent.data(records).enter();   
-         scaleXvalues(); //rescale the x-axis range for the new values                        
-      }
-      
-      drawChart.scaleXaxis = function(){
-         scaleXvalues(); //rescale the x-axis range for the new values         
       }
       
       //clears filters and redraws chart

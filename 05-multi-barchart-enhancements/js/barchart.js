@@ -57,7 +57,11 @@ function barcharts(setFilters){
       //function to set the xaxis scale based on width var
       var xScaleFunction;
       var barHeight, barSection, barTop, barParent, bar, barId;
-      
+      // Define the div for the tooltip
+      var tipDiv = d3.select("#charts").append("div")	
+         .attr("class", "tooltip")				
+         .style("opacity", 0);
+    
       init(); //init vars
 
       //---make the chart---   
@@ -72,53 +76,18 @@ function barcharts(setFilters){
             .on({ //event handlers
                "mouseover": function(d) {
                   d3.select(this).style("cursor", "pointer"); 
-                    //---------------------------
-/*                  d3.select(this)
-                    .transition()
-                    .duration(500)
-                    .attr("x", width/2) //function(d) { return x(d.cocoa) - 30; })
-                    .attr("width", 60);
-                  d3.select(this)
-                     .append("div")
-                     .attr("class", "mytooltip")
-                     .style("opacity", "0")
-                     .style("display", "none")
-                     .transition()  //Opacity transition when the tooltip appears
-                     .duration(500)
-                     .style("opacity", "1")                           
-                     .style("display", "block");  //The tooltip appears
-                  d3.select(this)
-                     .append("div")
-                     .attr("class", "mytooltip")
-                     .style("opacity", "0")
-                     .style("display", "none")
-                     .text("Testing")
-                     /*
-//                     .html(
-//                     "<div id='thumbnail'>Members: </div>")
-//                     .style("left", 30 + "px")   
-//                     .style("top", 30 + "px");    
-*/                     
+                  tipDiv.transition()		
+                      .duration(200)		
+                      .style("opacity", .9);		
+                  tipDiv.html("Category: " + config.key + "<br>" + config.value + ": "  + d.value)	
+                      .style("left", (d3.event.pageX) + "px")		
+                      .style("top", (d3.event.pageY - 28) + "px");	
                },
                "mouseout": function(d) {
                   d3.select(this).style("cursor", "default"); 
-                  //---------------------------
-/*                  d3.select(this)
-                     .transition()
-                     .duration(500)
-                     .attr("x", function(d) { return 20; })
-                     .style("cursor", "normal")
-                     .attr("width", 40)
-                  d3.select(this)
-                     .append("div")
-                     .attr("class", "mytooltip")
-                     .style("opacity", "0")
-                     .style("display", "none")
-                     .transition()  //Opacity transition when the tooltip disappears
-                     .duration(500)
-                     .style("opacity", "0")            
-                     .style("display", "none")  //The tooltip disappears
-*/
+                  tipDiv.transition()		
+                      .duration(500)		
+                      .style("opacity", 0);	
                },
                "click": function(d) { //handle bar click
                   if(filters[d.key] === d.key){ //is currently selected so deselect it

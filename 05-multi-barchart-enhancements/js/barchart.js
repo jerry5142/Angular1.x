@@ -61,7 +61,8 @@ function barcharts(setFilters){
       var tipDiv = d3.select("#charts").append("div")	
          .attr("class", "tooltip")				
          .style("opacity", 0);
-    
+
+         
       init(); //init vars
 
       //---make the chart---   
@@ -70,6 +71,9 @@ function barcharts(setFilters){
          scaleXvalues(); 
          barParent = g.selectAll("g")
             .data(records);
+
+         barParent.exit().remove();
+            
          bar = barParent.enter().append("g")
             .attr("class", "bar")      
             .attr("transform", function(d, i) { return "translate(0," + Math.round( i * barSection + barTop) + ")"; })
@@ -141,7 +145,7 @@ function barcharts(setFilters){
             .text(config.title);
 
          //what to do on exit
-         barParent.exit().remove();
+ //        barParent.exit().remove();
          
          //---what to do on update code---
          //redraw values
@@ -157,12 +161,49 @@ function barcharts(setFilters){
 
       //---private functions---
       //reduce on the x-axis value, generate and sort the records
-      function setRecords(){
-         return group
+       function setRecords(){
+/*          return group
             .reduceSum(function(d){ return d[config.value]; }).all()
             .sort(function(x, y){ return d3.ascending(x.index, y.index); });         
+ */         
+            var totals = {
+               "members" : {},
+               "funds" : {}
+            };
+            var records = group.reduceSum(reduceAdd).all();
+//            .sort(function(x, y){ return d3.ascending(x.index, y.index); });         
+            return records;
+      };
+    
+       function reduceAdd(p, v) {
+        var memTotal = {};
+        var funTotal = {};
+        memTotal[v] += p[v];
+        funTotal += p["funds"];
+
+        return {"members": memTotal, "funds": funTotal};
+      };
+
+      function reduceRemove(p) {
+        return p;
       }
-      
+
+      function reduceInitial() {
+        return 0;
+      }
+
+      function orderValue(p) {
+        return p.members;
+      }
+/*
+      function setRecords(){
+         var dataGroup = group.reduceSum(reduceAdd).all();
+         return dataGroup.members;
+         
+//            .reduceSum(function(d){ return d[config.value]; }).all();
+//            .sort(function(x, y){ return d3.ascending(x.index, y.index); });         
+      }
+ */      
       //scale the range for the x-axis values
       function scaleXvalues(){
          xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
@@ -202,13 +243,13 @@ function barcharts(setFilters){
                   .html("<label>" + config.key + "</label>")
                .append("label")
                   .attr("id", config.key + "FilterValue")
-                  .attr("class", "filterBox")
-                  .html("<label>---</label>");               
+                  .attr("class", "filterBox filterBar")
+                  .html("<label>---</label>");
       }
       
       function updateFilterDisplay(filterVal){
          var val = "---";
-         var classes = "filterBox";
+         var classes = "filterBox filterBar";
          if(filterVal){
             val = filterVal;
             classes += " filterSelected";

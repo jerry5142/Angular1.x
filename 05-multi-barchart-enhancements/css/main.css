@@ -29,19 +29,19 @@
 .chartControlsContainer {
    display: grid;
    grid-template-columns: 300px 200px;
-   margin: 75px 0px 0px 70px;   
+   margin: 75px 0px 5px 10px;
    background-color: white;
-   margin-left: 0;
+   align-content: center;      
 }
-
 
 .xAxisSelect{
    width: 250px;
-   height: 40px;
-   padding: 10px;
+   height: 30px;
+   padding: 15px 15px 20px 15px;
    border: solid 1px;
    border-color: gray;
-   background-color: #F0F0F0;   
+   background-color: #F0F0F0;
+   align-content: center;   
 }
 
 button {
@@ -57,7 +57,7 @@ button {
 .filterContainer {
    display: grid;
    grid-template-columns: repeat(4, 100px);
-   grid-template-rows: repeat(2, 60px);
+   grid-template-rows: repeat(2, 10px);
 }
 
 .filterBox {
@@ -67,15 +67,23 @@ button {
    text-align: center;
    text-transform: capitalize;
    font-weight: bold;
-   font-style: normal;   
-   padding: 7px;
+   font-style: normal;
+   margin-top: 0px;
+   padding: 6px;
    border: solid 1px;
    border-color: gray;
    background-color: #F0F0F0;   
 }
 
-.filterSelected {
-   color: blue;
+.filterBar {
+   color: white;
    font-weight: bold;
+   border-color: black;
+   background-color: black;   
+}
+
+.filterSelected {
    font-style: italic;
+   border-color: blue;   
+   background-color: blue;   
 }

@@ -1,8 +1,8 @@
 <div class="chartControlsContainer">
    <div id="chartControls" class="xAxisSelect">
       <button ng-click="resetAll()"> {{resetName}}</button>
-      <label ng-repeat="value in radioConfigCopy.values">
-         <input type="radio"  ng-attr-id="{{value + 'Radio' }}" class="radioButton" name="axisSelect" ng-value="value" ng-click="handleClick(value)" ng-checked="isDefaultRadioButton(value)"> {{value}}
+      <label ng-repeat="value in radioConfigCopy.values"  class="radioButton">
+         <input type="radio"  ng-attr-id="{{value + 'Radio' }}" name="axisSelect" ng-value="value" ng-click="handleClick(value)" ng-checked="isDefaultRadioButton(value)"> {{value}}
       </label>
    </div>
    <div id="chartFilters" class="filterContainer"></div>

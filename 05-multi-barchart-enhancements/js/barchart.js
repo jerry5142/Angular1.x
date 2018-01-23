@@ -3,10 +3,10 @@
    var dataFilePath = "data/dataFourCat.json";
    var divId = "charts"; //where to draw the charts
    var configs = [ 
-      {"id": "color", "title": "Colors", "key": "color", "value": "members"}, 
-      {"id": "letter", "title": "Letters", "key": "letter", "value": "members"},
-      {"id": "shape", "title": "Shapes", "key": "shape", "value": "members"},
-      {"id": "country", "title": "Countries", "key": "country", "value": "members", "left": 80, "yOffset": -10}
+      {"id": "color", "title": "Colors", "key": "color", "value": ["members", "funds"]}, 
+      {"id": "letter", "title": "Letters", "key": "letter", "value": ["members", "funds"]},
+      {"id": "shape", "title": "Shapes", "key": "shape", "value": ["members", "funds"]},
+      {"id": "country", "title": "Countries", "key": "country", "value": ["members", "funds"], "left": 80, "yOffset": -10}
    ];
    
 //-------------------globals----------------------   
@@ -42,6 +42,7 @@ function barcharts(setFilters){
 //-------------------chart object---------------------- 
    var makeChart = function(crossfilter, chartDivId, chartConfig){
       //---private vars---
+      var valueIndex = 0; //first value in the config is the default
       //put default config values here. They will be used if chartConfig does not have them
       var defaultConfigs = {"width": 500, "height": 300, "top": 60, "right": 20,  "bottom": 30, "left": 60, "xOffset": -10, "yOffset": 5, "ticCnt": 6};
       //configuration data for the chart
@@ -61,9 +62,31 @@ function barcharts(setFilters){
       var tipDiv = d3.select("#charts").append("div")	
          .attr("class", "tooltip")				
          .style("opacity", 0);
-
          
-      init(); //init vars
+      //initialize svg container, variables, etc;
+      chart = d3.select("#" + chartDivId).append("svg").attr("id", config.id)
+         .attr("width", config.width).attr("height", config.height);
+      margin = {top: config.top, right: config.right, bottom: config.bottom, left: config.left};
+      width = +chart.attr("width") - config.left - config.right;
+      height = +chart.attr("height") - config.top - config.bottom;
+      g = chart.append("g").attr("transform", "translate(" + config.left + "," + config.top + ")");
+      xScaleFunction = d3.scale.linear().range([0, width]);  
+      barHeight = height / 6;
+      barSection = (height / records.length);
+      barTop = (barSection - barHeight) / 2;
+      barId = "#" + config.id + " g .bar"; //sets the id for selecting bars via selectAll()
+      chart.attr("class", "chart"); //set the chart class
+      filters[config.key] = null; //set initial filter state
+      d3.select("#chartFilters")
+         .append("div")
+            .append("label")
+               .attr("id", config.key + "FilterName")
+               .attr("class", "filterBox")
+               .html("<label>" + config.key + "</label>")
+            .append("label")
+               .attr("id", config.key + "FilterValue")
+               .attr("class", "filterBox filterBar")
+               .html("<label>---</label>");
 
       //---make the chart---   
       function drawChart() {
@@ -73,7 +96,7 @@ function barcharts(setFilters){
             .data(records);
 
          barParent.exit().remove();
-            
+         
          bar = barParent.enter().append("g")
             .attr("class", "bar")      
             .attr("transform", function(d, i) { return "translate(0," + Math.round( i * barSection + barTop) + ")"; })
@@ -82,8 +105,8 @@ function barcharts(setFilters){
                   d3.select(this).style("cursor", "pointer"); 
                   tipDiv.transition()		
                       .duration(200)		
-                      .style("opacity", .9);		
-                  tipDiv.html("Category: " + config.key + "<br>" + config.value + ": "  + d.value)	
+                      .style("opacity", .9);
+                  tipDiv.html(makeToolTip(d))	
                       .style("left", (d3.event.pageX) + "px")		
                       .style("top", (d3.event.pageY - 28) + "px");	
                },
@@ -148,24 +171,52 @@ function barcharts(setFilters){
          //redraw values
          if(showVals){ //show/hide bar values   
             barParent.selectAll(".chart .xValues")
-               .attr("x", function(d) { return xScaleFunction(d.value) + -5*config.xOffset; })
-               .text(function(d){ return d.value; }); 
-         }
+                .attr("x", function(d) { return xScaleFunction(d.value[valueIndex].value) + -5*config.xOffset; })
+                .text(function(d){ return d.value[valueIndex].value; }); 
+          }
          //redraw bars
          barParent.selectAll("rect")
-            .attr("width", function(d) { return xScaleFunction(d.value); });  
+            .attr("width", function(d) { return xScaleFunction(d.value[valueIndex].value); });  
       }
 
       //---private functions---
-      //reduce on the x-axis value, generate and sort the records
-      function setRecords(){
-         return group.reduceSum(function(d){ return d[config.value]; }).all()
-            .sort(function(x, y){ return d3.ascending(x.index, y.index); });         
+      function makeToolTip(d){
+         var tipText = "Category: " + config.key; 
+         for(var i=0; i<config.value.length; i++){
+            tipText += "<br>" + config.value[i] + ": "  + d.value[i].value
+         }
+         return tipText;
       }
+      
+      //reduce on the x-axis value, generate and sort the records
+       function setRecords(){
+            var records = group.reduce(reduceAdd, reduceRemove, reduceInitial).order(orderValue).all();
+            return records;
+      };
+    
+      function reduceAdd(p, v) {
+            p[0].value += v.members;
+            p[1].value += v.funds;
+         return p;
+      };
+
+      function reduceRemove(p, v) {
+            p[0].value -= v.members;
+            p[1].value -= v.funds;
+         return p;
+      };
+      
+      function reduceInitial() {
+          return  [{key: config.key, value: 0}, {key: config.key, value: 0}]; 
+      };
+
+      function orderValue(p) {
+        return p.key;
+      };
 
       //scale the range for the x-axis values
       function scaleXvalues(){
-         xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value; }) / config.ticCnt))]);
+         xScaleFunction.domain([0,  (config.ticCnt + 2) * (Math.floor(d3.max(records, function(d) { return d.value[valueIndex].value; }) / config.ticCnt))]);
       }
       
       //adds default configs if newConfig doesn't have them
@@ -177,33 +228,6 @@ function barcharts(setFilters){
             }
          }
          return newConfig;
-      }
-      
-      //initialize svg container, variables, etc;
-      function init(){
-         chart = d3.select("#" + chartDivId).append("svg").attr("id", config.id)
-            .attr("width", config.width).attr("height", config.height);
-         margin = {top: config.top, right: config.right, bottom: config.bottom, left: config.left};
-         width = +chart.attr("width") - config.left - config.right;
-         height = +chart.attr("height") - config.top - config.bottom;
-         g = chart.append("g").attr("transform", "translate(" + config.left + "," + config.top + ")");
-         xScaleFunction = d3.scale.linear().range([0, width]);  
-         barHeight = height / 6;
-         barSection = (height / records.length);
-         barTop = (barSection - barHeight) / 2;
-         barId = "#" + config.id + " g .bar"; //sets the id for selecting bars via selectAll()
-         chart.attr("class", "chart"); //set the chart class
-         filters[config.key] = null; //set initial filter state
-         d3.select("#chartFilters")
-            .append("div")
-               .append("label")
-                  .attr("id", config.key + "FilterName")
-                  .attr("class", "filterBox")
-                  .html("<label>" + config.key + "</label>")
-               .append("label")
-                  .attr("id", config.key + "FilterValue")
-                  .attr("class", "filterBox filterBar")
-                  .html("<label>---</label>");
       }
       
       function updateFilterDisplay(filterVal){
@@ -230,7 +254,7 @@ function barcharts(setFilters){
          if(!axisKey){ //nothing to do
             return; 
          }
-         config.value = axisKey; //set the new config value
+         valueIndex = config.value.indexOf(axisKey);
       }
       
       //clears filters and redraws chart

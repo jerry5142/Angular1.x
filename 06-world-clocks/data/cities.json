@@ -1,0 +1,34 @@
+{
+   "cities": [
+      {
+         "city": "Honolulu",
+         "tz": "US/Hawaii",
+         "time": ""
+      },
+      {
+         "city": "Anchorage",
+         "tz": "US/Alaska",
+         "time": ""
+      },
+      {
+         "city": "Seattle",
+         "tz": "US/Pacific",
+         "time": ""
+      },
+      {
+         "city": "Phoenix",
+         "tz": "US/Mountain",
+         "time": ""
+      },
+      {
+         "city": "San Antonio",
+         "tz": "US/Central",
+         "time": ""
+      },
+      {
+         "city": "Washington D.C.",
+         "tz": "US/Eastern",
+         "time": ""
+      }
+   ]
+}

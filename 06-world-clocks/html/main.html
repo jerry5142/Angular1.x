@@ -1,0 +1,15 @@
+<div class="controlsContainer">
+   <div id="controls" class="controls">
+      <button ng-click="updateTimes()">Update</button><br>   
+      <label><input type="checkbox" ng-model="formats.dateFormat.enabled" class="checkbox" ng-click="dateClick(this)">Show Date</label><br>
+      <label><input type="checkbox" ng-model="formats.secondsFormat.enabled" class="checkbox" ng-click="secondsClick(this)">Show Seconds</label><br>
+      <label><input type="checkbox" ng-model="formats.time24Format.enabled" class="checkbox" ng-click="time24Click(this)">24 Hour Format</label><br>
+   </div>
+</div>
+<div class="clocksContainer">
+   <span ng-repeat="city in cities" class="clock">
+      <label class="city">{{city.city}}</label>
+      <label ng-attr-id="{{city.tz}}" class="timezone"> ({{city.tz}})</label>
+      <div class="time">{{city.time}}</div>
+   </span>     
+</div>

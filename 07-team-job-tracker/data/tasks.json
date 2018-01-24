@@ -1,0 +1,132 @@
+{
+  "plan" : [
+  {
+   "owner": "Julie",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-29T04:15:30-06:00",
+   "endDate": "2018-01-29T15:13:10-06:00"
+  },
+  {
+   "owner": "Ken",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-29T14:15:30-06:00",
+   "endDate": "2018-01-29T16:11:10-06:00"
+  },
+  {
+   "owner": "Alex",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-29T15:15:30-06:00",
+   "endDate": "2018-01-29T17:13:10-06:00"
+  },
+  {
+   "owner": "Greg",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-29T18:15:30-06:00",
+   "endDate": "2018-01-29T21:11:10-06:00"
+  },
+  {
+   "owner": "Vanessa",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-30T08:15:30-06:00",
+   "endDate": "2018-01-30T10:01:10-06:00"
+  },
+  {
+   "owner": "Gerry",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-30T09:15:30-06:00",
+   "endDate": "2018-01-30T11:01:10-06:00"
+  },
+  {
+   "owner": "Jerry",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-30T10:15:30-06:00",
+   "endDate": "2018-01-31T12:01:10-06:00"
+  }
+  ],
+  "actual" : [
+  {
+   "owner": "Julie",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-29T04:15:30-06:00",
+   "endDate": "2018-01-29T15:13:10-06:00"
+  },
+  {
+   "owner": "Ken",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-29T14:15:30-06:00",
+   "endDate": "2018-01-29T16:11:10-06:00"
+  },
+  {
+   "owner": "Alex",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-29T15:15:30-06:00",
+   "endDate": "2018-01-29T17:13:10-06:00"
+  },
+  {
+   "owner": "Greg",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-29T18:15:30-06:00",
+   "endDate": "2018-01-29T21:11:10-06:00"
+  },
+  {
+   "owner": "Vanessa",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-30T08:15:30-06:00",
+   "endDate": "2018-01-30T10:01:10-06:00"
+  },
+  {
+   "owner": "Gerry",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-30T09:15:30-06:00",
+   "endDate": "2018-01-30T11:01:10-06:00"
+  },
+  {
+   "owner": "Jerry",
+   "taskName": "Plan",
+   "status":"RUNNING",   
+	"plan": "alpha",
+	"actual": "circle",
+   "startDate": "2018-01-30T10:15:30-06:00",
+   "endDate": "2018-01-31T12:01:10-06:00"
+  }
+  ]
+}

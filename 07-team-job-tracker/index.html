@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gantt Chart Example 3</title>
+<link type="text/css" href="css/style.css" rel="stylesheet" />
+<link type="text/css" href="css/example.css" rel="stylesheet" />
+</head>
+<body>
+   <div class="attribution">
+      Attribution:
+      <em>Dimitry Kudryavtsev</em> 
+      <a href="http://bl.ocks.org/dk8996/5538271" target="_blank"><br>http://bl.ocks.org/dk8996/5538271</a>
+      <a href="http://static.mentful.com/gantt-chart-d3v2.js" target="_blank"><br>http://static.mentful.com/gantt-chart-d3v2.js</a>      
+   </div>
+   <div class="gantt">
+<!--      <button type="button" onclick="addTask()">Add Task</button>
+      <button type="button" onclick="removeTask()">Remove Task</button> -->
+      <button type="button" onclick="changeTimeDomain('')">Reset Axis</button>
+      <button type="button" onclick="changeTimeDomain('1hr')">1 HR</button>
+      <button type="button" onclick="changeTimeDomain('3hr')">3 HR</button>
+      <button type="button" onclick="changeTimeDomain('6hr')">6 HR</button>
+      <button type="button" onclick="changeTimeDomain('1day')">1 DAY</button>
+      <button type="button" onclick="changeTimeDomain('1week')">1 WEEK</button>
+   </div>
+</body>
+</html>
+<script type="text/javascript" src="lib/moment.min.js"></script>
+<script type="text/javascript" src="lib/moment-timezone.js"></script>
+<script type="text/javascript" src="lib/d3.min.js"></script>
+<script type="text/javascript" src="js/gantt-chart-d3v2.js"></script>
+<script type="text/javascript" src="js/example3.js"></script>
+

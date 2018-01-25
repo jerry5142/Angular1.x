@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gantt Chart Example 3</title>
+<link type="text/css" href="css/style.css" rel="stylesheet" />
+<link type="text/css" href="css/example.css" rel="stylesheet" />
+</head>
+<body>
+   <div class="controls">
+      <div class="axisMode">
+         <label><input type="radio" name="axisMode" value="day" onclick="changeTimeDomain(axisStartDate, axisEndDate)" checked="checked">Show Day</label>
+         <label><input type="radio" name="axisMode" value="all" onclick="changeTimeDomain(dataStartDate, dataEndDate)">Show All</label>
+      </div>
+   </div>
+   <div id="chart"></div>
+   <div class="attribution">
+      Attribution:
+      <em>Dimitry Kudryavtsev</em> 
+      <a href="http://bl.ocks.org/dk8996/5538271" target="_blank"><br>http://bl.ocks.org/dk8996/5538271</a>
+      <a href="http://static.mentful.com/gantt-chart-d3v2.js" target="_blank"><br>http://static.mentful.com/gantt-chart-d3v2.js</a>
+   </div>
+</body>
+</html>
+<script type="text/javascript" src="lib/moment.min.js"></script>
+<script type="text/javascript" src="lib/moment-timezone.js"></script>
+<script type="text/javascript" src="lib/d3.min.js"></script>
+<script type="text/javascript" src="js/gantt-chart-d3v2.js"></script>
+<script type="text/javascript" src="js/example3.js"></script>
+
